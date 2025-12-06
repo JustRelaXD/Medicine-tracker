@@ -3,4 +3,13 @@
 #include<string.h>
 
 void loadData(); 
-void mainMenu();     
+void mainMenu();   
+
+nt main() {
+     
+      loadInitialData();
+      landingMenu();
+
+      return 0;
+}
+
