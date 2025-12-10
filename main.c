@@ -3,11 +3,11 @@
 #include<string.h>
 
 void loadData(); 
-void mainMenu();   
+void landingMenu();   
 
-nt main() {
+int main() {
      
-      loadInitialData();
+      loadData();
       landingMenu();
 
       return 0;
