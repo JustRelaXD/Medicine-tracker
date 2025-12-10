@@ -94,3 +94,36 @@ void insertMedicine(int id, const char *name, int qty, float price) {
     node->next = medicineHash[h];
     medicineHash[h] = node;
 }
+
+void searchMedicines() {
+      char input[50];
+      int found = 0;
+
+      printf("\n----- Search Medicines -----\n");
+      printf("Enter medicine name : ");
+      gets(input);     
+
+      for (int i = 0; i < HASH_SIZE; i++) {
+            MedicineNode *curr = medicineHash[i];
+            while (curr != NULL) {
+                  if (strcmp(curr->data.name, input) == 0) {
+                        printf("\nMedicine Found:\n");
+                        printf("ID       : %d\n", curr->data.id);
+                        printf("Name     : %s\n", curr->data.name);
+                        printf("Quantity : %d\n", curr->data.quantity);
+                        printf("Price    : %.2f\n", curr->data.price);
+                        showNearbyPharmacies(curr->data.id);
+
+                        found = 1;
+                        break;
+                    }
+                  curr = curr->next;
+              }
+            if (found) break;
+        }
+
+      if (!found) {
+            printf("\nMedicine '%s' not found.\n", input);
+            handleNameError(input);
+        }
+}
