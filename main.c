@@ -4,6 +4,18 @@
 
 #define HASH_SIZE 101
 
+typedef struct {
+      int id;
+      char name[50];
+      int quantity;
+      float price;
+} Medicine;
+
+typedef struct MedicineNode {
+      Medicine data;
+      struct MedicineNode *next;
+} MedicineNode;
+
 void loadData(); 
 void landingMenu();   
 
