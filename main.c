@@ -101,7 +101,7 @@ void searchMedicines() {
 
       printf("\n----- Search Medicines -----\n");
       printf("Enter medicine name : ");
-      gets(input);     
+      scanf(" %[^\n]", input);   
 
       for (int i = 0; i < HASH_SIZE; i++) {
             MedicineNode *curr = medicineHash[i];
