@@ -127,3 +127,13 @@ void searchMedicines() {
             handleNameError(input);
         }
 }
+
+void loadData() {
+
+      insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
+      insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
+      insertMedicine(103, "Amoxicillin 250mg", 20, 80.0f);
+      insertMedicine(104, "Cetirizine 10mg",   40, 15.0f);
+
+      printf("Loaded sample medicines.\n");
+}
