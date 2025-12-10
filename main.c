@@ -37,6 +37,10 @@ int main() {
       return 0;
 }
 
+int getHash(int id) {
+      return id % HASH_SIZE;
+}
+
 void landingMenu() {
     int choice;
 
