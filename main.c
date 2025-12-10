@@ -2,6 +2,8 @@
 #include<stdlib.h>
 #include<string.h>
 
+#define HASH_SIZE 101
+
 void loadData(); 
 void landingMenu();   
 
