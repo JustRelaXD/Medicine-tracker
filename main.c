@@ -16,6 +16,16 @@ typedef struct MedicineNode {
       struct MedicineNode *next;
 } MedicineNode;
 
+MedicineNode *medicineHash[HASH_SIZE] = { NULL };
+
+void searchMedicines();
+void userLoginRegister();
+void pharmacyLoginRegister();
+
+void handleNameError(const char *inputName);
+void showNearbyPharmacies(int medicineId);
+void insertMedicine(int id, const char *name, int qty, float price);
+
 void loadData(); 
 void landingMenu();   
 
