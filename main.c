@@ -128,6 +128,22 @@ void searchMedicines() {
         }
 }
 
+void handleNameError(const char *inputName) {
+      printf("[Name error handler not implemented for '%s']\n", inputName);
+}
+
+void showNearbyPharmacies(int medicineId) {
+      printf("\n[Nearby pharmacies for medicine ID %d will be shown here]\n", medicineId);
+}
+
+void userLoginRegister() {
+      printf("\n[User Login / Register feature not implemented yet]\n");
+}
+
+void pharmacyLoginRegister() {
+      printf("\n[Pharmacy Login / Register feature not implemented yet]\n");
+}
+
 void loadData() {
 
       insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
@@ -137,3 +153,5 @@ void loadData() {
 
       printf("Loaded sample medicines.\n");
 }
+
+
