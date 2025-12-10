@@ -77,3 +77,20 @@ void landingMenu() {
         }
     }
 }
+
+void insertMedicine(int id, const char *name, int qty, float price) {
+    MedicineNode *node = (MedicineNode*)malloc(sizeof(MedicineNode));
+    if (node == NULL) {
+        printf("Memory allocation failed.\n");
+        return;
+    }
+
+    node->data.id = id;
+    strcpy(node->data.name, name);
+    node->data.quantity = qty;
+    node->data.price = price;
+
+    int h = getHash(id);
+    node->next = medicineHash[h];
+    medicineHash[h] = node;
+}
