@@ -16,6 +16,23 @@ typedef struct MedicineNode {
       struct MedicineNode *next;
 } MedicineNode;
 
+typedef struct {
+      int reservationId;
+      int pharmacyId;
+      int medicineId;
+      int qty;
+      int status;
+} Reservation;
+
+typedef struct ReservationNode {
+    Reservation data;
+    struct ReservationNode *next;
+} ReservationNode;
+
+ReservationNode *resFront = NULL;
+ReservationNode *resRear = NULL;
+int nextReservationId = 1;
+
 MedicineNode *medicineHash[HASH_SIZE] = { NULL };
 
 void searchMedicines();
