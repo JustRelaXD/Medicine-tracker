@@ -216,6 +216,20 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
       return NULL;
 }
 
+MedicineNode* findMedicineByName(const char *name) {
+    if (!name) return NULL;
+    for (int i = 0; i < HASH_SIZE; i++) {
+        MedicineNode *cur = medicineHash[i];
+        while (cur) {
+            if (strcmp(cur->data.name, name) == 0) {
+                return cur;
+            }
+            cur = cur->next;
+        }
+    }
+    return NULL;
+}
+
 void addMedicineToPharmacy(int pharmacyId, int medId, int qty) {
       int idx = -1;
       for (int i = 0; i < pharmacyCount; i++) {
@@ -236,73 +250,200 @@ void addMedicineToPharmacy(int pharmacyId, int medId, int qty) {
         }
 }
 
-void showNearbyPharmacies(int medicineId) {
-      int indices[1000];
-      int quantities[1000];
-      int matchCount = 0;
-      for (int i = 0; i < pharmacyCount; i++) {
-            PharmMed *pm = findMedicineInPharmacy(&pharmacies[i], medicineId);
-            if (pm && pm->qty > 0) {
-                  indices[matchCount] = i;
-                  quantities[matchCount] = pm->qty;
-                  matchCount++;
-                  if (matchCount >= 1000) break;
-              }
-        }
-      if (matchCount == 0) {
-            printf("\nNo pharmacies currently have this medicine in stock.\n");
-            return;
-        }
-      printf("\nPharmacies with the medicine:\n");
-      for (int i = 0; i < matchCount; i++) {
-            int pidx = indices[i];
-            printf("%d) %s (Pharmacy ID %d) | Pincode: %d | Qty: %d\n",
-                                  i + 1,
-                                  pharmacies[pidx].name,
-                                  pharmacies[pidx].id,
-                                  pharmacies[pidx].pincode,
-                                  quantities[i]);
-        }
+void showNearbyPharmacies(int initialMedicineId) {
+      int selected[100];
+      int selCount = 0;
+      if (initialMedicineId != 0) selected[selCount++] = initialMedicineId;
+      char input[100];
+
       while (1) {
-            int choice = 0;
+            printf("\nSelected medicines (%d): ", selCount);
+            for (int i = 0; i < selCount; i++) {
+                  MedicineNode *mnode = NULL;
+                  for (int b = 0; b < HASH_SIZE && !mnode; b++) {
+                        MedicineNode *cur = medicineHash[b];
+                        while (cur) {
+                              if (cur->data.id == selected[i]) { mnode = cur; break; }
+                              cur = cur->next;
+                          }
+                    }
+                  if (mnode) printf("%s%s", mnode->data.name, (i==selCount-1) ? "" : ", ");
+                  else printf("%d%s", selected[i], (i==selCount-1) ? "" : ", ");
+              }
+            printf("\n");
+
             printf("\nOptions:\n");
             printf("1. Add another medicine\n");
-            printf("2. Book reservation / pickup\n");
-            printf("3. Return to previous menu\n");
+            printf("2. Find pharmacies that have ALL selected medicines\n");
+            printf("3. Book reservation at a pharmacy for all selected medicines\n");
+            printf("4. Return to previous menu\n");
             printf("Enter choice: ");
+
+            int choice;
             if (scanf(" %d", &choice) != 1) {
-                  int ch; while ((ch = getchar()) != '\n' && ch != EOF);
+                  int ch;
+                  while ((ch = getchar()) != '\n' && ch != EOF) { }
+                  choice = 4;
+              }
+
+            if (choice == 1) {
+                  printf("Enter medicine name : ");
+                  scanf(" %[^\n]", input);
+                  MedicineNode *mnode = findMedicineByName(input);
+                  if (!mnode) {
+                        printf("Medicine '%s' not found.\n", input);
+                        handleNameError(input);
+                        printf("1. Try again  2. Return\n");
+                        int c;
+                        if (scanf(" %d", &c) != 1) {
+                              int ch;
+                              while ((ch = getchar()) != '\n' && ch != EOF) { }
+                              c = 2;
+                          }
+                        if (c == 1) continue;
+                        else return;
+                    }
+                  int exists = 0;
+                  for (int i = 0; i < selCount; i++) if (selected[i] == mnode->data.id) { exists = 1; break; }
+                  if (!exists && selCount < 100) {
+                        selected[selCount++] = mnode->data.id;
+                        printf("Added '%s'. Total selected: %d\n", mnode->data.name, selCount);
+
+                        /* show details immediately after adding */
+                        printf("Details:\n");
+                        printf("Medicine : %s\n", mnode->data.name);
+                        printf("Price    : %.2f\n", mnode->data.price);
+                        printf("In stock : %d (global)\n", mnode->data.quantity);
+                    } else {
+                        printf("Already selected or selection full.\n");
+                    }
                   continue;
               }
-            if (choice == 1) {
-                  return;
-              } else if (choice == 2) {
+
+            else if (choice == 2) {
+                  int foundAny = 0;
+                  printf("\nPharmacies with ALL selected medicines:\n");
+                  for (int i = 0; i < pharmacyCount; i++) {
+                        int hasAll = 1;
+                        for (int s = 0; s < selCount; s++) {
+                              PharmMed *pm = findMedicineInPharmacy(&pharmacies[i], selected[s]);
+                              if (!(pm && pm->qty > 0)) { hasAll = 0; break; }
+                          }
+                        if (hasAll) {
+                              foundAny = 1;
+                              printf(" - %s | Pincode: %d\n", pharmacies[i].name, pharmacies[i].pincode);
+                          }
+                    }
+                  if (!foundAny) printf(" No pharmacies found with all selected medicines.\n");
+                  continue;
+              }
+
+            else if (choice == 3) {
+                  if (selCount == 0) { printf("No medicines selected.\n"); continue; }
+
+                  int matches[1000];
+                  int matchCount = 0;
+
+                  for (int i = 0; i < pharmacyCount; i++) {
+                        int hasAll = 1;
+                        for (int s = 0; s < selCount; s++) {
+                              PharmMed *pm = findMedicineInPharmacy(&pharmacies[i], selected[s]);
+                              if (!(pm && pm->qty > 0)) { hasAll = 0; break; }
+                          }
+                        if (hasAll) {
+                              matches[matchCount++] = i;
+                              if (matchCount >= 1000) break;
+                          }
+                    }
+
+                  if (matchCount == 0) { printf("No pharmacies currently have all selected medicines.\n"); continue; }
+
+                  printf("\nPharmacies that have all selected medicines:\n");
+                  for (int i = 0; i < matchCount; i++) {
+                        int pidx = matches[i];
+                        printf("%d) %s | Pincode: %d\n", i+1, pharmacies[pidx].name, pharmacies[pidx].pincode);
+                    }
+
+                  printf("Enter pharmacy number to book from (1-%d): ", matchCount);
                   int pick;
-                  printf("Enter pharmacy number (1-%d): ", matchCount);
-                  if (scanf(" %d", &pick) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF)
-        ; continue; }
-                  if (pick < 1 || pick > matchCount) continue;
-                  int selectedIndex = indices[pick - 1];
-                  PharmMed *pm = findMedicineInPharmacy(&pharmacies[selectedIndex], medicineId);
-                  if (!pm || pm->qty <= 0) continue;
-                  int reqQty;
-                  printf("Enter quantity (available %d): ", pm->qty);
-                  if (scanf(" %d", &reqQty) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF)
-        ; continue; }
-                  if (reqQty <= 0 || reqQty > pm->qty) continue;
-                  pm->qty -= reqQty;
-                  createAndEnqueueReservation(pharmacies[selectedIndex].id, medicineId, reqQty);
-                  printf("Reservation successful. Reservation ID: %d\n", nextReservationId - 1);
+                  if (scanf(" %d", &pick) != 1) {
+                        int ch;
+                        while ((ch = getchar()) != '\n' && ch != EOF) { }
+                        continue;
+                    }
+                  if (pick < 1 || pick > matchCount) { printf("Invalid choice.\n"); continue; }
+
+                  int selectedIndex = matches[pick - 1];
+                  int ok = 1;
+                  int reqQtys[100];
+                  char customerName[100];
+                  char customerPhone[40];
+
+                  for (int s = 0; s < selCount; s++) {
+                        PharmMed *pm = findMedicineInPharmacy(&pharmacies[selectedIndex], selected[s]);
+                        int avail = pm ? pm->qty : 0;
+
+                        MedicineNode *mnode = NULL;
+                        for (int b = 0; b < HASH_SIZE && !mnode; b++) {
+                              MedicineNode *cur = medicineHash[b];
+                              while (cur) {
+                                    if (cur->data.id == selected[s]) { mnode = cur; break; }
+                                    cur = cur->next;
+                                }
+                          }
+                        const char *mname = mnode ? mnode->data.name : "Unknown";
+
+                        printf("Enter quantity for '%s' (available %d): ", mname, avail);
+                        if (scanf(" %d", &reqQtys[s]) != 1) {
+                              int ch;
+                              while ((ch = getchar()) != '\n' && ch != EOF) { }
+                              ok = 0;
+                              break;
+                          }
+                        if (reqQtys[s] <= 0 || reqQtys[s] > avail) { printf("Invalid qty for %s.\n", mname); ok = 0; break; }
+                    }
+
+                  if (!ok) { printf("Booking aborted due to invalid quantities.\n"); continue; }
+
+                  /* ask for customer details */
+                  printf("Enter customer name: ");
+                  while ((getchar()) != '\n' && getchar() != EOF) { } /* clear newline */
+                  scanf(" %[^\n]", customerName);
+                  printf("Enter phone number: ");
+                  scanf(" %[^\n]", customerPhone);
+
+                  for (int s = 0; s < selCount; s++) {
+                        PharmMed *pm = findMedicineInPharmacy(&pharmacies[selectedIndex], selected[s]);
+                        pm->qty -= reqQtys[s];
+
+                        MedicineNode *mnode = NULL;
+                        for (int b = 0; b < HASH_SIZE && !mnode; b++) {
+                              MedicineNode *cur = medicineHash[b];
+                              while (cur) {
+                                    if (cur->data.id == selected[s]) { mnode = cur; break; }
+                                    cur = cur->next;
+                                }
+                          }
+                        const char *mname = mnode ? mnode->data.name : "Unknown";
+
+                        createAndEnqueueReservation(pharmacies[selectedIndex].id, selected[s], reqQtys[s]);
+
+                        printf("Reserved %d of %s at %s for %s (Phone: %s). Reservation ID: %d\n",
+                                                      reqQtys[s], mname, pharmacies[selectedIndex].name, customerName, customerPhone, nextReservationId - 1);
+                    }
                   return;
-              } else if (choice == 3) {
+              }
+
+            else if (choice == 4) {
                   return;
-              } else {
+              }
+
+            else {
+                  printf("Invalid choice.\n");
                   continue;
               }
         }
 }
-
-
 
 void handleNameError(const char *inputName) {
       printf("[Name error handler not implemented for '%s']\n", inputName);
