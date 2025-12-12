@@ -216,8 +216,25 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
       return NULL;
 }
 
+void addMedicineToPharmacy(int pharmacyId, int medId, int qty) {
+      int idx = -1;
+      for (int i = 0; i < pharmacyCount; i++) {
+            if (pharmacies[i].id == pharmacyId) { idx = i; break; }
+        }
+      if (idx == -1) return;
+      Pharmacy *p = &pharmacies[idx];
+      PharmMed *node = findMedicineInPharmacy(p, medId);
+      if (node) {
+            node->qty += qty;
+        } else {
+            node = (PharmMed*)malloc(sizeof(PharmMed));
+            if (!node) return;
+            node->medId = medId;
+            node->qty = qty;
+            node->next = p->inventory;
+            p->inventory = node;
+        }
 }
-
 
 
 void handleNameError(const char *inputName) {
