@@ -236,14 +236,76 @@ void addMedicineToPharmacy(int pharmacyId, int medId, int qty) {
         }
 }
 
+void showNearbyPharmacies(int medicineId) {
+      int indices[1000];
+      int quantities[1000];
+      int matchCount = 0;
+      for (int i = 0; i < pharmacyCount; i++) {
+            PharmMed *pm = findMedicineInPharmacy(&pharmacies[i], medicineId);
+            if (pm && pm->qty > 0) {
+                  indices[matchCount] = i;
+                  quantities[matchCount] = pm->qty;
+                  matchCount++;
+                  if (matchCount >= 1000) break;
+              }
+        }
+      if (matchCount == 0) {
+            printf("\nNo pharmacies currently have this medicine in stock.\n");
+            return;
+        }
+      printf("\nPharmacies with the medicine:\n");
+      for (int i = 0; i < matchCount; i++) {
+            int pidx = indices[i];
+            printf("%d) %s (Pharmacy ID %d) | Pincode: %d | Qty: %d\n",
+                                  i + 1,
+                                  pharmacies[pidx].name,
+                                  pharmacies[pidx].id,
+                                  pharmacies[pidx].pincode,
+                                  quantities[i]);
+        }
+      while (1) {
+            int choice = 0;
+            printf("\nOptions:\n");
+            printf("1. Add another medicine\n");
+            printf("2. Book reservation / pickup\n");
+            printf("3. Return to previous menu\n");
+            printf("Enter choice: ");
+            if (scanf(" %d", &choice) != 1) {
+                  int ch; while ((ch = getchar()) != '\n' && ch != EOF);
+                  continue;
+              }
+            if (choice == 1) {
+                  return;
+              } else if (choice == 2) {
+                  int pick;
+                  printf("Enter pharmacy number (1-%d): ", matchCount);
+                  if (scanf(" %d", &pick) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF); continue; }
+                  if (pick < 1 || pick > matchCount) continue;
+                  int selectedIndex = indices[pick - 1];
+                  PharmMed *pm = findMedicineInPharmacy(&pharmacies[selectedIndex], medicineId);
+                  if (!pm || pm->qty <= 0) continue;
+                  int reqQty;
+                  printf("Enter quantity (available %d): ", pm->qty);
+                  if (scanf(" %d", &reqQty) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF); continue; }
+                  if (reqQty <= 0 || reqQty > pm->qty) continue;
+                  pm->qty -= reqQty;
+                  createAndEnqueueReservation(pharmacies[selectedIndex].id, medicineId, reqQty);
+                  printf("Reservation successful. Reservation ID: %d\n", nextReservationId - 1);
+                  return;
+              } else if (choice == 3) {
+                  return;
+              } else {
+                  continue;
+              }
+        }
+}
+
+
 
 void handleNameError(const char *inputName) {
       printf("[Name error handler not implemented for '%s']\n", inputName);
 }
 
-void showNearbyPharmacies(int medicineId) {
-      printf("\n[Nearby pharmacies for medicine ID %d will be shown here]\n", medicineId);
-}
 
 void userLoginRegister() {
       printf("\n[User Login / Register feature not implemented yet]\n");
