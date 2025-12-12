@@ -254,14 +254,30 @@ void pharmacyLoginRegister() {
 }
 
 void loadData() {
-
       insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
       insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
       insertMedicine(103, "Amoxicillin 250mg", 20, 80.0f);
       insertMedicine(104, "Cetirizine 10mg",   40, 15.0f);
+      insertMedicine(105, "Dolo 650",          60, 28.0f);
 
-      printf("Loaded sample medicines.\n");
+      pharmacyCount = 0;
+
+      addPharmacy(1, "City Medicals", 400001, 19.0760f, 72.8777f);
+      addPharmacy(2, "Health Plus",   400002, 19.0800f, 72.8800f);
+      addPharmacy(3, "Care Pharmacy", 400003, 19.0700f, 72.8700f);
+
+      addMedicineToPharmacy(1, 101, 20);
+      addMedicineToPharmacy(1, 102, 10);
+      addMedicineToPharmacy(1, 105, 15);
+
+      addMedicineToPharmacy(2, 101, 5);
+      addMedicineToPharmacy(2, 104, 15);
+      addMedicineToPharmacy(2, 103, 7);
+
+      addMedicineToPharmacy(3, 103, 8);
+      addMedicineToPharmacy(3, 101, 12);
+      addMedicineToPharmacy(3, 105, 6);
+
+      printf("Loaded sample medicines and pharmacies.\n");
 }
-
-
 
