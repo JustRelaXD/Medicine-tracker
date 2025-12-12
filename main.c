@@ -279,14 +279,16 @@ void showNearbyPharmacies(int medicineId) {
               } else if (choice == 2) {
                   int pick;
                   printf("Enter pharmacy number (1-%d): ", matchCount);
-                  if (scanf(" %d", &pick) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF); continue; }
+                  if (scanf(" %d", &pick) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF)
+        ; continue; }
                   if (pick < 1 || pick > matchCount) continue;
                   int selectedIndex = indices[pick - 1];
                   PharmMed *pm = findMedicineInPharmacy(&pharmacies[selectedIndex], medicineId);
                   if (!pm || pm->qty <= 0) continue;
                   int reqQty;
                   printf("Enter quantity (available %d): ", pm->qty);
-                  if (scanf(" %d", &reqQty) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF); continue; }
+                  if (scanf(" %d", &reqQty) != 1) { int ch; while ((ch = getchar()) != '\n' && ch != EOF)
+        ; continue; }
                   if (reqQty <= 0 || reqQty > pm->qty) continue;
                   pm->qty -= reqQty;
                   createAndEnqueueReservation(pharmacies[selectedIndex].id, medicineId, reqQty);
