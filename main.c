@@ -207,7 +207,16 @@ void addPharmacy(int id, const char *name, int pincode, float lat, float lon) {
       pharmacyCount++;
 }
 
+PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
+      PharmMed *cur = p->inventory;
+      while (cur) {
+            if (cur->medId == medId) return cur;
+            cur = cur->next;
+        }
+      return NULL;
+}
 
+}
 
 
 
