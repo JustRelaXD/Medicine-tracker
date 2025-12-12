@@ -195,7 +195,17 @@ void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty) {
       enqueueReservation(r);
 }
 
-
+void addPharmacy(int id, const char *name, int pincode, float lat, float lon) {
+      if (pharmacyCount >= MAX_PHARMACIES) return;
+      pharmacies[pharmacyCount].id = id;
+      strncpy(pharmacies[pharmacyCount].name, name, sizeof(pharmacies[pharmacyCount].name)-1);
+      pharmacies[pharmacyCount].name[sizeof(pharmacies[pharmacyCount].name)-1] = '\0';
+      pharmacies[pharmacyCount].pincode = pincode;
+      pharmacies[pharmacyCount].lat = lat;
+      pharmacies[pharmacyCount].lon = lon;
+      pharmacies[pharmacyCount].inventory = NULL;
+      pharmacyCount++;
+}
 
 
 
