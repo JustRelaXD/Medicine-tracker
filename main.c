@@ -157,12 +157,16 @@ void enqueueReservation(Reservation r) {
             resRear = node;
         }
 }
-  }
-  }
+
+void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty) {
+      Reservation r;
+      r.reservationId = nextReservationId++;
+      r.pharmacyId = pharmacyId;
+      r.medicineId = medicineId;
+      r.qty = qty;
+      r.status = 0;
+      enqueueReservation(r);
 }
-
-
-
 
 
 
