@@ -172,6 +172,8 @@ void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty) {
 
 
 
+
+
 void handleNameError(const char *inputName) {
       printf("[Name error handler not implemented for '%s']\n", inputName);
 }
