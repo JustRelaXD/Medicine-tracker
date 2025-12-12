@@ -2,6 +2,23 @@
 #include<stdlib.h>
 #include<string.h>
 
+void loadData();
+void landingMenu();
+void searchMedicines();
+void handleNameError(const char *inputName);
+void showNearbyPharmacies(int medicineId);
+
+int getHash(int id);
+void insertMedicine(int id, const char *name, int qty, float price);
+MedicineNode* findMedicineByName(const char *name);
+
+void addPharmacy(int id, const char *name, int pincode, float lat, float lon);
+void addMedicineToPharmacy(int pharmacyId, int medId, int qty);
+PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId);
+
+void enqueueReservation(Reservation r);
+void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty);
+
 #define HASH_SIZE 101
 
 typedef struct {
@@ -34,17 +51,6 @@ ReservationNode *resRear = NULL;
 int nextReservationId = 1;
 
 MedicineNode *medicineHash[HASH_SIZE] = { NULL };
-
-void searchMedicines();
-void userLoginRegister();
-void pharmacyLoginRegister();
-
-void handleNameError(const char *inputName);
-void showNearbyPharmacies(int medicineId);
-void insertMedicine(int id, const char *name, int qty, float price);
-
-void loadData(); 
-void landingMenu();   
 
 int main() {
      
