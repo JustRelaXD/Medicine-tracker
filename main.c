@@ -53,9 +53,9 @@ typedef struct {
 #define MAX_PHARMACIES 200
 Pharmacy pharmacies[MAX_PHARMACIES];
 int pharmacyCount = 0;
-}
-}
 
+void userLoginRegister();
+void pharmacyLoginRegister();
 void loadData();
 void landingMenu();
 void searchMedicines();
