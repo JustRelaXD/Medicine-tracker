@@ -145,6 +145,29 @@ void searchMedicines() {
         }
 }
 
+void enqueueReservation(Reservation r) {
+      ReservationNode *node = (ReservationNode*)malloc(sizeof(ReservationNode));
+      if (!node) return;
+      node->data = r;
+      node->next = NULL;
+      if (!resRear) {
+            resFront = resRear = node;
+        } else {
+            resRear->next = node;
+            resRear = node;
+        }
+}
+  }
+  }
+}
+
+
+
+
+
+
+
+
 void handleNameError(const char *inputName) {
       printf("[Name error handler not implemented for '%s']\n", inputName);
 }
@@ -170,5 +193,6 @@ void loadData() {
 
       printf("Loaded sample medicines.\n");
 }
+
 
 
