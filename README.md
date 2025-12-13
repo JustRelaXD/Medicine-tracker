@@ -1,6 +1,7 @@
-#**Medicine Tracker**
+#Medicine Tracker
 
 A C console-based system that allows users to search medicines, check availability across pharmacies, and reserve items for pickup. The program maintains a medicine database, pharmacy inventories, and a reservation queue.
+
 
 
 **Features**  
@@ -15,12 +16,15 @@ A C console-based system that allows users to search medicines, check availabili
 - Generate a unique reservation ID  
 
 
+
 **Data Structures Used**  
 - Hash table for fast medicine lookup  
 - Linked lists for medicine lists and pharmacy inventories
 - Queue for reservations  
 - Arrays for storing selected medicine IDs  
 - Structs for pharmacies, medicines, inventory nodes, and reservations  
+
+
 
 **How It Works**  
 - Program loads sample medicines and pharmacies during startup  
@@ -32,6 +36,7 @@ A C console-based system that allows users to search medicines, check availabili
 - Reservation is created and stock is reduced  
 
 
+
 **Project Structure**  
 main.c
 - Medicine Hash Table  
@@ -39,6 +44,7 @@ main.c
 - Reservation Queue  
 - Search and Selection System  
 - Reservation / Pickup Logic  
+
 
 
 **Compilation**
@@ -52,6 +58,7 @@ clang main.c -o medicine_tracker
 ```
 
 
+
 **Future Enhancements**  
 - File-based loading and saving of data  
 - Pharmacy login and dashboard  
@@ -59,6 +66,7 @@ clang main.c -o medicine_tracker
 - Error-tolerant / fuzzy medicine search  
 - Map-based nearest pharmacy display  
 - Export reservation logs  
+
 
 
 **About This Project**  
