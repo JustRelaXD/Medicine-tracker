@@ -2,8 +2,8 @@
 
 A C console-based system that allows users to search medicines, check availability across pharmacies, and reserve items for pickup. The program maintains a medicine database, pharmacy inventories, and a reservation queue.
 
-<br>
- **Features**  
+  
+###### **Features**  
 - Search medicines by exact name  
 - Show details of each medicine (name, price, quantity)  
 - Add multiple medicines before checking availability  
@@ -14,16 +14,16 @@ A C console-based system that allows users to search medicines, check availabili
 - Update stock automatically after reservation  
 - Generate a unique reservation ID  
 
-  <br>
- **Data Structures Used**  
+  
+###### **Data Structures Used**  
 - Hash table for fast medicine lookup  
 - Linked lists for medicine lists and pharmacy inventories
 - Queue for reservations  
 - Arrays for storing selected medicine IDs  
 - Structs for pharmacies, medicines, inventory nodes, and reservations  
 
-  <br>
- **How It Works**  
+  
+###### **How It Works**  
 - Program loads sample medicines and pharmacies during startup  
 - User searches for a medicine  
 - User can add more medicines to the selection  
@@ -32,8 +32,8 @@ A C console-based system that allows users to search medicines, check availabili
 - System collects name and phone number  
 - Reservation is created and stock is reduced  
 
-  <br>  
- **Project Structure**  
+  
+###### **Project Structure**  
 main.c
 - Medicine Hash Table  
 - Pharmacy List and Inventory  
@@ -41,19 +41,19 @@ main.c
 - Search and Selection System  
 - Reservation / Pickup Logic  
 
-  <br>
- **Compilation**
+  
+###### **Compilation**
 ```
 clang main.c -o medicine_tracker
 ```
 
- **Run the program:**
+###### **Run the program:**
 ```
 ./medicine_tracker
 ```
 
-  <br>
-  **Future Enhancements**  
+  
+ ###### **Future Enhancements**  
 - File-based loading and saving of data  
 - Pharmacy login and dashboard  
 - Reservation confirmation interface  
@@ -61,8 +61,8 @@ clang main.c -o medicine_tracker
 - Map-based nearest pharmacy display  
 - Export reservation logs  
 
-  <br>
- **About This Project**  
+  
+###### **About This Project**  
 - Created for a Project-Based Learning (PBL) requirement  
 - Demonstrates data structure usage in C  
 - Focuses on practical problem-solving  
