@@ -1,12 +1,11 @@
-**Medicine Tracker**
+#**Medicine Tracker**
 
 A C console-based system that allows users to search medicines, check availability across pharmacies, and reserve items for pickup. The program maintains a medicine database, pharmacy inventories, and a reservation queue.
 
 
 **Features**  
-
 • Search medicines by exact name  
-• Show details of each medicine (name, price, quantity)
+• Show details of each medicine (name, price, quantity)  
 • Add multiple medicines before checking availability  
 • Display pharmacies that have all selected medicines  
 • Show pharmacy name, pincode, and available stock  
@@ -16,16 +15,14 @@ A C console-based system that allows users to search medicines, check availabili
 • Generate a unique reservation ID  
 
 
-**Data Structures Used
-
+**Data Structures Used**  
 • Hash table for fast medicine lookup  
-• Linked lists for medicine lists and pharmacy inventories  
+• Linked lists for medicine lists and pharmacy inventories
 • Queue for reservations  
 • Arrays for storing selected medicine IDs  
 • Structs for pharmacies, medicines, inventory nodes, and reservations  
 
-**How It Works**
-
+**How It Works**  
 • Program loads sample medicines and pharmacies during startup  
 • User searches for a medicine  
 • User can add more medicines to the selection  
@@ -35,8 +32,7 @@ A C console-based system that allows users to search medicines, check availabili
 • Reservation is created and stock is reduced  
 
 
-**Project Structure**
-
+**Project Structure**  
 main.c
 - Medicine Hash Table  
 - Pharmacy List and Inventory  
@@ -55,8 +51,7 @@ clang main.c -o medicine_tracker
 ./medicine_tracker
 ```
 
-**Future Enhancements**
-
+**Future Enhancements**  
 • File-based loading and saving of data  
 • Pharmacy login and dashboard  
 • Reservation confirmation interface  
@@ -65,8 +60,7 @@ clang main.c -o medicine_tracker
 • Export reservation logs  
 
 
-**About This Project**
-
+**About This Project**  
 • Created for a Project-Based Learning (PBL) requirement  
 • Demonstrates data structure usage in C  
 • Focuses on practical problem-solving  
