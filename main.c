@@ -208,14 +208,88 @@ void enqueueReservation(Reservation r) {
         }
 }
 
-void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty) {
-      Reservation r;
-      r.reservationId = nextReservationId++;
-      r.pharmacyId = pharmacyId;
-      r.medicineId = medicineId;
-      r.qty = qty;
-      r.status = 0;
-      enqueueReservation(r);
+void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty, 
+                                  const char *custName, const char *custPhone) {
+    Reservation r;
+    r.reservationId = nextReservationId++;
+    r.pharmacyId = pharmacyId;
+    r.medicineId = medicineId;
+    r.qty = qty;
+    r.status = 0; 
+    strncpy(r.customerName, custName, sizeof(r.customerName) - 1);
+    r.customerName[sizeof(r.customerName) - 1] = '\0';
+    strncpy(r.customerPhone, custPhone, sizeof(r.customerPhone) - 1);
+    r.customerPhone[sizeof(r.customerPhone) - 1] = '\0';
+    
+    enqueueReservation(r);
+    saveReservationToFile(r);  
+}
+
+void saveReservationToFile(Reservation r) {
+    FILE *fp = fopen("reservation.txt", "a");
+    if (!fp) {
+        printf("Error: Could not open reservation.txt for writing\n");
+        return;
+    }
+    
+    fprintf(fp, "%d|%d|%d|%d|%d|%s|%s\n",
+            r.reservationId,
+            r.pharmacyId,
+            r.medicineId,
+            r.qty,
+            r.status,
+            r.customerName,
+            r.customerPhone);
+    
+    fclose(fp);
+}
+
+void viewAllReservations() {
+    if (!resFront) {
+        printf("\nNo reservations found.\n");
+        return;
+    }
+    
+    printf("\n========== ALL RESERVATIONS ==========\n");
+    ReservationNode *cur = resFront;
+    
+    while (cur) {
+        Reservation r = cur->data;
+
+        Pharmacy *p = findPharmacyById(r.pharmacyId);
+        const char *pharmName = p ? p->name : "Unknown";
+
+        MedicineNode *mnode = NULL;
+        for (int i = 0; i < HASH_SIZE && !mnode; i++) {
+            MedicineNode *m = medicineHash[i];
+            while (m) {
+                if (m->data.id == r.medicineId) {
+                    mnode = m;
+                    break;
+                }
+                m = m->next;
+            }
+        }
+        const char *medName = mnode ? mnode->data.name : "Unknown";
+
+        const char *statusText;
+        switch(r.status) {
+            case 0: statusText = "Pending"; break;
+            case 1: statusText = "Completed"; break;
+            case 2: statusText = "Cancelled"; break;
+            default: statusText = "Unknown";
+        }
+        
+        printf("\nReservation ID: %d\n", r.reservationId);
+        printf("Customer: %s (Phone: %s)\n", r.customerName, r.customerPhone);
+        printf("Pharmacy: %s\n", pharmName);
+        printf("Medicine: %s\n", medName);
+        printf("Quantity: %d\n", r.qty);
+        printf("Status: %s\n", statusText);
+        printf("-----------------------------------\n");
+        
+        cur = cur->next;
+    }
 }
 
 void addPharmacy(int id, const char *name, int pincode, float lat, float lon) {
@@ -427,7 +501,6 @@ void showNearbyPharmacies(int initialMedicineId) {
 
                   if (!ok) { printf("Booking aborted due to invalid quantities.\n"); continue; }
 
-                  /* ask for customer details */
                   printf("Enter customer name: ");
                   while ((getchar()) != '\n' && getchar() != EOF) { } /* clear newline */
                   scanf(" %[^\n]", customerName);
@@ -448,7 +521,7 @@ void showNearbyPharmacies(int initialMedicineId) {
                           }
                         const char *mname = mnode ? mnode->data.name : "Unknown";
 
-                        createAndEnqueueReservation(pharmacies[selectedIndex].id, selected[s], reqQtys[s]);
+                       createAndEnqueueReservation(pharmacies[selectedIndex].id, selected[s], reqQtys[s], customerName, customerPhone);
 
                         printf("Reserved %d of %s at %s for %s (Phone: %s). Reservation ID: %d\n",
                                                       reqQtys[s], mname, pharmacies[selectedIndex].name, customerName, customerPhone, nextReservationId - 1);
@@ -484,30 +557,7 @@ void loadData() {
       loadMedicines();
       loadPharmacies();
       loadInventory();
-      
-      // insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
-      // insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
-      // insertMedicine(103, "Amoxicillin 250mg", 20, 80.0f);
-      // insertMedicine(104, "Cetirizine 10mg",   40, 15.0f);
-      // insertMedicine(105, "Dolo 650",          60, 28.0f);
-
-      //pharmacyCount = 0;
-
-      // addPharmacy(1, "City Medicals", 400001, 19.0760f, 72.8777f);
-      // addPharmacy(2, "Health Plus",   400002, 19.0800f, 72.8800f);
-      // addPharmacy(3, "Care Pharmacy", 400003, 19.0700f, 72.8700f);
-
-      // addMedicineToPharmacy(1, 101, 20);
-      // addMedicineToPharmacy(1, 102, 10);
-      // addMedicineToPharmacy(1, 105, 15);
-
-      // addMedicineToPharmacy(2, 101, 5);
-      // addMedicineToPharmacy(2, 104, 15);
-      // addMedicineToPharmacy(2, 103, 7);
-
-      // addMedicineToPharmacy(3, 103, 8);
-      // addMedicineToPharmacy(3, 101, 12);
-      // addMedicineToPharmacy(3, 105, 6);
+      loadReservations();
 
       printf("Loaded sample medicines and pharmacies.\n");
 }
@@ -607,7 +657,6 @@ void loadInventory() {
         char *token;
         int pharmacyId, medId, qty;
 
-        // Parse pharmacy ID
         token = strtok(line, "|");
         if (!token) {
             printf("Line %d: Failed to parse pharmacy ID\n", lineCount);
@@ -615,7 +664,6 @@ void loadInventory() {
         }
         pharmacyId = atoi(token);
 
-        // Parse medicine ID
         token = strtok(NULL, "|");
         if (!token) {
             printf("Line %d: Failed to parse medicine ID\n", lineCount);
@@ -623,7 +671,6 @@ void loadInventory() {
         }
         medId = atoi(token);
 
-        // Parse quantity
         token = strtok(NULL, "|");
         if (!token) {
             printf("Line %d: Failed to parse quantity\n", lineCount);
@@ -631,14 +678,12 @@ void loadInventory() {
         }
         qty = atoi(token);
 
-        // Find the pharmacy
         Pharmacy *p = findPharmacyById(pharmacyId);
         if (!p) {
             printf("Line %d: Pharmacy ID %d not found!\n", lineCount, pharmacyId);
             continue;
         }
 
-        // Add medicine to pharmacy inventory
         PharmMed *node = malloc(sizeof(PharmMed));
         if (!node) {
             printf("Line %d: Memory allocation failed\n", lineCount);
@@ -655,7 +700,6 @@ void loadInventory() {
 
     fclose(fp);
     
-    // Print complete inventory summary
     printf("\n===== INVENTORY SUMMARY =====\n");
     printf("Total pharmacies loaded: %d\n\n", pharmacyCount);
     
@@ -677,4 +721,61 @@ void loadInventory() {
     printf("===========================\n\n");
 }
 
+void loadReservations() {
+    FILE *fp = fopen("reservation.txt", "r");
+    if (!fp) {
+        printf("No existing reservations found (reservation.txt doesn't exist)\n");
+        return;
+    }
+    
+    char line[512];
+    int count = 0;
+    
+    while (fgets(line, sizeof(line), fp)) {
+        Reservation r;
+        char *token;
+
+        token = strtok(line, "|");
+        if (!token) continue;
+        r.reservationId = atoi(token);
+
+        if (r.reservationId >= nextReservationId) {
+            nextReservationId = r.reservationId + 1;
+        }
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        r.pharmacyId = atoi(token);
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        r.medicineId = atoi(token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        r.qty = atoi(token);
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        r.status = atoi(token);
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strncpy(r.customerName, token, sizeof(r.customerName) - 1);
+        r.customerName[sizeof(r.customerName) - 1] = '\0';
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strncpy(r.customerPhone, token, sizeof(r.customerPhone) - 1);
+        r.customerPhone[sizeof(r.customerPhone) - 1] = '\0';  
+        r.customerPhone[strcspn(r.customerPhone, "\n")] = '\0';
+        
+        enqueueReservation(r);
+        count++;
+    }
+    
+    fclose(fp);
+    printf("Loaded %d existing reservations\n", count);
+    printf("Next reservation ID will be: %d\n\n", nextReservationId);
+}
 
