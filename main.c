@@ -22,6 +22,8 @@ typedef struct {
       int medicineId;
       int qty;
       int status;
+      char customerName[100];
+      char customerPhone[20];
 } Reservation;
 
 typedef struct ReservationNode {
@@ -58,16 +60,16 @@ int pharmacyCount = 0;
 void userLoginRegister();
 void pharmacyLoginRegister();
 void loadData();
-
 void loadMedicines();
 void loadPharmacies();
+void loadInventory();
 
 void landingMenu();
 
 void searchMedicines();
 void handleNameError(const char *inputName);
 void showNearbyPharmacies(int medicineId);
-
+Pharmacy* findPharmacyById(int id);
 int getHash(const char *name);
 void insertMedicine(int id, const char *name, int qty, float price);
 MedicineNode* findMedicineByName(const char *name);
@@ -76,8 +78,11 @@ void addPharmacy(int id, const char *name, int pincode, float lat, float lon);
 void addMedicineToPharmacy(int pharmacyId, int medId, int qty);
 PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId);
 
+void saveReservationToFile(Reservation r);
+void loadReservations();
+void viewAllReservations();  // optional
 void enqueueReservation(Reservation r);
-void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty);
+void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty, const char *custName, const char *custPhone);
 
 int main() {
      
@@ -180,6 +185,14 @@ void searchMedicines() {
             printf("\nMedicine '%s' not found.\n", input);
             handleNameError(input);
         }
+}
+
+Pharmacy* findPharmacyById(int id) {
+    for (int i = 0; i < pharmacyCount; i++) {
+        if (pharmacies[i].id == id)
+            return &pharmacies[i];
+    }
+    return NULL;
 }
 
 void enqueueReservation(Reservation r) {
@@ -470,6 +483,7 @@ void pharmacyLoginRegister() {
 void loadData() {
       loadMedicines();
       loadPharmacies();
+      loadInventory();
       
       // insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
       // insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
@@ -477,23 +491,23 @@ void loadData() {
       // insertMedicine(104, "Cetirizine 10mg",   40, 15.0f);
       // insertMedicine(105, "Dolo 650",          60, 28.0f);
 
-      pharmacyCount = 0;
+      //pharmacyCount = 0;
 
       // addPharmacy(1, "City Medicals", 400001, 19.0760f, 72.8777f);
       // addPharmacy(2, "Health Plus",   400002, 19.0800f, 72.8800f);
       // addPharmacy(3, "Care Pharmacy", 400003, 19.0700f, 72.8700f);
 
-      addMedicineToPharmacy(1, 101, 20);
-      addMedicineToPharmacy(1, 102, 10);
-      addMedicineToPharmacy(1, 105, 15);
+      // addMedicineToPharmacy(1, 101, 20);
+      // addMedicineToPharmacy(1, 102, 10);
+      // addMedicineToPharmacy(1, 105, 15);
 
-      addMedicineToPharmacy(2, 101, 5);
-      addMedicineToPharmacy(2, 104, 15);
-      addMedicineToPharmacy(2, 103, 7);
+      // addMedicineToPharmacy(2, 101, 5);
+      // addMedicineToPharmacy(2, 104, 15);
+      // addMedicineToPharmacy(2, 103, 7);
 
-      addMedicineToPharmacy(3, 103, 8);
-      addMedicineToPharmacy(3, 101, 12);
-      addMedicineToPharmacy(3, 105, 6);
+      // addMedicineToPharmacy(3, 103, 8);
+      // addMedicineToPharmacy(3, 101, 12);
+      // addMedicineToPharmacy(3, 105, 6);
 
       printf("Loaded sample medicines and pharmacies.\n");
 }
@@ -576,4 +590,91 @@ void loadPharmacies() {
 
     fclose(fp);
 }
+
+void loadInventory() {
+    FILE *fp = fopen("inventory.txt", "r");
+    if (!fp) {
+        printf("Error: Could not open inventory.txt\n");
+        return;
+    }
+
+    printf("Loading inventory from file...\n");
+    char line[256];
+    int lineCount = 0;
+
+    while (fgets(line, sizeof(line), fp)) {
+        lineCount++;
+        char *token;
+        int pharmacyId, medId, qty;
+
+        // Parse pharmacy ID
+        token = strtok(line, "|");
+        if (!token) {
+            printf("Line %d: Failed to parse pharmacy ID\n", lineCount);
+            continue;
+        }
+        pharmacyId = atoi(token);
+
+        // Parse medicine ID
+        token = strtok(NULL, "|");
+        if (!token) {
+            printf("Line %d: Failed to parse medicine ID\n", lineCount);
+            continue;
+        }
+        medId = atoi(token);
+
+        // Parse quantity
+        token = strtok(NULL, "|");
+        if (!token) {
+            printf("Line %d: Failed to parse quantity\n", lineCount);
+            continue;
+        }
+        qty = atoi(token);
+
+        // Find the pharmacy
+        Pharmacy *p = findPharmacyById(pharmacyId);
+        if (!p) {
+            printf("Line %d: Pharmacy ID %d not found!\n", lineCount, pharmacyId);
+            continue;
+        }
+
+        // Add medicine to pharmacy inventory
+        PharmMed *node = malloc(sizeof(PharmMed));
+        if (!node) {
+            printf("Line %d: Memory allocation failed\n", lineCount);
+            continue;
+        }
+        node->medId = medId;
+        node->qty = qty;
+        node->next = p->inventory;
+        p->inventory = node;
+
+        printf("Added: Pharmacy %d (%s) - Medicine %d - Qty %d\n", 
+               pharmacyId, p->name, medId, qty);
+    }
+
+    fclose(fp);
+    
+    // Print complete inventory summary
+    printf("\n===== INVENTORY SUMMARY =====\n");
+    printf("Total pharmacies loaded: %d\n\n", pharmacyCount);
+    
+    for (int i = 0; i < pharmacyCount; i++) {
+        printf("Pharmacy: %s (ID: %d, Pincode: %d)\n", 
+               pharmacies[i].name, pharmacies[i].id, pharmacies[i].pincode);
+        
+        PharmMed *cur = pharmacies[i].inventory;
+        if (!cur) {
+            printf("  No inventory loaded\n");
+        } else {
+            while (cur) {
+                printf("  - Medicine ID %d: Qty %d\n", cur->medId, cur->qty);
+                cur = cur->next;
+            }
+        }
+        printf("\n");
+    }
+    printf("===========================\n\n");
+}
+
 
