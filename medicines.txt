@@ -1,3 +1,12 @@
 101|Dolo 650|25.00
 102|Crocin|18.50
 103|Azithromycin 500|120.00
+104|Paracetamol 500mg|25.00
+105|Paracetamol 650mg|40.00
+106|Alpha|35.00
+107|Delta|34.00
+108|Gamma|34.00
+109|test|345.00
+110|try|35.00
+111|trrerg|453.00
+112|cough|34.00

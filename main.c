@@ -66,7 +66,6 @@ int accountCount = 0;
 Pharmacy pharmacies[MAX_PHARMACIES];
 int pharmacyCount = 0;
 
-void userLoginRegister();
 void pharmacyLoginRegister();
 void loadData();
 void loadMedicines();
@@ -120,9 +119,8 @@ void landingMenu() {
         printf("         Medicine Tracker\n");
         printf("===============================\n");
         printf("1. Search Medicines (No login required)\n");
-        printf("2. User Login / Register\n");
-        printf("3. Pharmacy Login / Register\n");
-        printf("4. Exit\n");
+        printf("2. Pharmacy Login / Register\n");
+        printf("3. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -132,14 +130,10 @@ void landingMenu() {
                 break;
 
             case 2:
-                userLoginRegister();
-                break;
-
-            case 3:
                 pharmacyLoginRegister();
                 break;
 
-            case 4:
+            case 3:
                 printf("Exiting...\n");
                 return;
 
@@ -564,11 +558,6 @@ void handleNameError(const char *inputName) {
       printf("[Name error handler not implemented for '%s']\n", inputName);
 }
 
-
-void userLoginRegister() {
-      printf("\n[User Login / Register feature not implemented yet]\n");
-}
-
 void pharmacyLoginRegister() {
       int pharmacyId = pharmacyLogin();
     if (pharmacyId != -1) {
@@ -953,56 +942,121 @@ void viewPharmacyInventory(int pharmacyId) {
     }
 }
 
+// void addMedicineToInventory(int pharmacyId) {
+//     Pharmacy *p = findPharmacyById(pharmacyId);
+//     if (!p) return;
+    
+//     char medName[100];
+//     int qty;
+    
+//     printf("\n===== Add Medicine to Inventory =====\n");
+//     printf("Enter medicine name: ");
+//     scanf(" %[^\n]", medName);
+    
+//     MedicineNode *mnode = findMedicineByName(medName);
+//     if (!mnode) {
+//         printf("Medicine '%s' not found in database\n", medName);
+//         printf("Available medicines:\n");
+//         for (int i = 0; i < HASH_SIZE; i++) {
+//             MedicineNode *cur = medicineHash[i];
+//             while (cur) {
+//                 printf("  - %s (ID: %d)\n", cur->data.name, cur->data.id);
+//                 cur = cur->next;
+//             }
+//         }
+//         return;
+//     }
+    
+//     PharmMed *existing = findMedicineInPharmacy(p, mnode->data.id);
+//     if (existing) {
+//         printf("✗ Medicine already exists in your inventory (Current qty: %d)\n", existing->qty);
+//         printf("Please use 'Update Medicine Quantity' option instead.\n");
+//         return;
+//     }
+    
+//     printf("Enter quantity: ");
+//     if (scanf("%d", &qty) != 1 || qty <= 0) {
+//         printf("Invalid quantity\n");
+//         while (getchar() != '\n');
+//         return;
+//     }
+    
+//     PharmMed *node = (PharmMed*)malloc(sizeof(PharmMed));
+//     if (!node) {
+//         printf("Memory allocation failed\n");
+//         return;
+//     }
+//     node->medId = mnode->data.id;
+//     node->qty = qty;
+//     node->next = p->inventory;
+//     p->inventory = node;
+    
+//     printf("✓ Added %d units of %s to inventory\n", qty, mnode->data.name);
+// }
+
 void addMedicineToInventory(int pharmacyId) {
-    Pharmacy *p = findPharmacyById(pharmacyId);
-    if (!p) return;
-    
-    char medName[100];
-    int qty;
-    
-    printf("\n===== Add Medicine to Inventory =====\n");
-    printf("Enter medicine name: ");
-    scanf(" %[^\n]", medName);
-    
-    MedicineNode *mnode = findMedicineByName(medName);
-    if (!mnode) {
-        printf("Medicine '%s' not found in database\n", medName);
-        printf("Available medicines:\n");
-        for (int i = 0; i < HASH_SIZE; i++) {
-            MedicineNode *cur = medicineHash[i];
-            while (cur) {
-                printf("  - %s (ID: %d)\n", cur->data.name, cur->data.id);
-                cur = cur->next;
+    FILE *fp;
+    int id, newId = 100;
+    char name[100], newName[100];
+    float price, newPrice;
+    int quantity;
+    int found = 0;
+
+    printf("Enter Medicine Name: ");
+    scanf(" %[^\n]", newName);
+
+    printf("Enter Price: ");
+    scanf("%f", &newPrice);
+
+    printf("Enter Quantity: ");
+    scanf("%d", &quantity);
+
+    fp = fopen("medicines.txt", "r");
+    if (fp != NULL) {
+        while (fscanf(fp, "%d|%[^|]|%f\n", &id, name, &price) != EOF) {
+            if (strcmp(name, newName) == 0) {
+                found = 1;
+                newId = id;
+                break;
             }
+            newId = id;
         }
-        return;
+        fclose(fp);
     }
-    
-    PharmMed *existing = findMedicineInPharmacy(p, mnode->data.id);
-    if (existing) {
-        printf("✗ Medicine already exists in your inventory (Current qty: %d)\n", existing->qty);
-        printf("Please use 'Update Medicine Quantity' option instead.\n");
-        return;
+
+    if (!found) {
+        newId++;
+        fp = fopen("medicines.txt", "a");
+        if (fp == NULL) return;
+        fprintf(fp, "%d|%s|%.2f\n", newId, newName, newPrice);
+        fclose(fp);
     }
-    
-    printf("Enter quantity: ");
-    if (scanf("%d", &qty) != 1 || qty <= 0) {
-        printf("Invalid quantity\n");
-        while (getchar() != '\n');
-        return;
+
+    fp = fopen("inventory.txt", "a");
+    if (fp == NULL) return;
+
+    fprintf(fp, "%d|%d|%d\n", pharmacyId, newId, quantity);
+    fclose(fp);
+
+    MedicineNode *mnode = malloc(sizeof(MedicineNode));
+    mnode->data.id = newId;
+    strcpy(mnode->data.name, newName);
+    mnode->data.price = newPrice;
+
+    int index = newId % HASH_SIZE;
+    mnode->next = medicineHash[index];
+    medicineHash[index] = mnode;
+
+    Pharmacy *p = findPharmacyById(pharmacyId);
+    if (p) {
+        PharmMed *node = malloc(sizeof(PharmMed));
+        node->medId = newId;
+        node->qty = quantity;
+        node->next = p->inventory;
+        p->inventory = node;
     }
-    
-    PharmMed *node = (PharmMed*)malloc(sizeof(PharmMed));
-    if (!node) {
-        printf("Memory allocation failed\n");
-        return;
-    }
-    node->medId = mnode->data.id;
-    node->qty = qty;
-    node->next = p->inventory;
-    p->inventory = node;
-    
-    printf("✓ Added %d units of %s to inventory\n", qty, mnode->data.name);
+
+    printf("Medicine added to inventory successfully\n"); 
 }
 
 void updateMedicineQuantity(int pharmacyId) {
