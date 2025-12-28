@@ -151,8 +151,8 @@ void loadMedicines() {
         if (!token) continue;
         price = atof(token);
 
-        printf("Loaded medicine: '%s'\n", name);
         insertMedicine(id, name, 0, price);
+        printf("Loaded medicine: '%s'\n", name);
     }
 
     fclose(fp);
