@@ -45,6 +45,7 @@ typedef struct {
       int id;
       char name[50];
       int pincode;
+      char phone[20];
       float lat;
       float lon;
       PharmMed *inventory;
@@ -57,8 +58,11 @@ int pharmacyCount = 0;
 void userLoginRegister();
 void pharmacyLoginRegister();
 void loadData();
-void landingMenu();
+
 void loadMedicines();
+void loadPharmacies();
+
+void landingMenu();
 
 void searchMedicines();
 void handleNameError(const char *inputName);
@@ -119,47 +123,6 @@ void landingMenu() {
         }
     }
 }
-
-void loadMedicines() {
-    FILE *fp = fopen("medicines.txt", "r");
-    if (!fp) {
-        printf("Error: Could not open medicines.txt\n");
-        return;
-    }
-
-    char line[256];
-
-    while (fgets(line, sizeof(line), fp)) {
-        char *token;
-        int id;
-        char name[100];
-        float price;
-
-        token = strtok(line, "|");
-        if (!token) continue;
-        id = atoi(token);
-
-        token = strtok(NULL, "|");
-        if (!token) continue;
-        strcpy(name, token);
-        name[strcspn(name, "\n")] = '\0';
-        name[strcspn(name, "\n")] = '\0';
-        name[strcspn(name, " ")] = '\0';
-
-
-        token = strtok(NULL, "|");
-        if (!token) continue;
-        price = atof(token);
-
-        insertMedicine(id, name, 0, price);
-        printf("Loaded medicine: '%s'\n", name);
-        printf("Hash insert index for '%s' = %d\n", name, getHash(name));
-
-    }
-
-    fclose(fp);
-}
-
 
 int getHash(const char *name) {
     unsigned long hash = 5381;
@@ -264,7 +227,6 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
 }
 
 MedicineNode* findMedicineByName(const char *name) {
-      printf("Searching '%s' at index %d\n", name, getHash(name));
 
     int index = getHash(name);
     MedicineNode *cur = medicineHash[index];
@@ -507,6 +469,7 @@ void pharmacyLoginRegister() {
 
 void loadData() {
       loadMedicines();
+      loadPharmacies();
       
       // insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
       // insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
@@ -516,9 +479,9 @@ void loadData() {
 
       pharmacyCount = 0;
 
-      addPharmacy(1, "City Medicals", 400001, 19.0760f, 72.8777f);
-      addPharmacy(2, "Health Plus",   400002, 19.0800f, 72.8800f);
-      addPharmacy(3, "Care Pharmacy", 400003, 19.0700f, 72.8700f);
+      // addPharmacy(1, "City Medicals", 400001, 19.0760f, 72.8777f);
+      // addPharmacy(2, "Health Plus",   400002, 19.0800f, 72.8800f);
+      // addPharmacy(3, "Care Pharmacy", 400003, 19.0700f, 72.8700f);
 
       addMedicineToPharmacy(1, 101, 20);
       addMedicineToPharmacy(1, 102, 10);
@@ -533,5 +496,84 @@ void loadData() {
       addMedicineToPharmacy(3, 105, 6);
 
       printf("Loaded sample medicines and pharmacies.\n");
+}
+
+void loadMedicines() {
+    FILE *fp = fopen("medicines.txt", "r");
+    if (!fp) {
+        printf("Error: Could not open medicines.txt\n");
+        return;
+    }
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), fp)) {
+        char *token;
+        int id;
+        char name[100];
+        float price;
+
+        token = strtok(line, "|");
+        if (!token) continue;
+        id = atoi(token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(name, token);
+        name[strcspn(name, "\n")] = '\0';
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        price = atof(token);
+
+        insertMedicine(id, name, 0, price);
+    }
+
+    fclose(fp);
+}
+
+void loadPharmacies() {
+    FILE *fp = fopen("pharmacies.txt", "r");
+    if (!fp) {
+        printf("Error: Could not open pharmacies.txt\n");
+        return;
+    }
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), fp)) {
+        char *token;
+        int id, pincode;
+        char name[100];
+        char phone[20];
+
+        token = strtok(line, "|");
+        if (!token) continue;
+        id = atoi(token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(name, token);
+        name[strcspn(name, "\n")] = '\0';
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        pincode = atoi(token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(phone, token);
+        phone[strcspn(phone, "\n")] = '\0';
+
+        pharmacies[pharmacyCount].id = id;
+        strcpy(pharmacies[pharmacyCount].name, name);
+        pharmacies[pharmacyCount].pincode = pincode;
+        strcpy(pharmacies[pharmacyCount].phone, phone);
+        pharmacies[pharmacyCount].inventory = NULL;
+
+        pharmacyCount++;
+    }
+
+    fclose(fp);
 }
 
