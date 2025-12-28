@@ -153,6 +153,8 @@ void loadMedicines() {
 
         insertMedicine(id, name, 0, price);
         printf("Loaded medicine: '%s'\n", name);
+        printf("Hash insert index for '%s' = %d\n", name, getHash(name));
+
     }
 
     fclose(fp);
@@ -262,6 +264,8 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
 }
 
 MedicineNode* findMedicineByName(const char *name) {
+      printf("Searching '%s' at index %d\n", name, getHash(name));
+
     int index = getHash(name);
     MedicineNode *cur = medicineHash[index];
 
