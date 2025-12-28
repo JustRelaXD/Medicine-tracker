@@ -143,11 +143,15 @@ void loadMedicines() {
         if (!token) continue;
         strcpy(name, token);
         name[strcspn(name, "\n")] = '\0';
+        name[strcspn(name, "\n")] = '\0';
+        name[strcspn(name, " ")] = '\0';
+
 
         token = strtok(NULL, "|");
         if (!token) continue;
         price = atof(token);
 
+        printf("Loaded medicine: '%s'\n", name);
         insertMedicine(id, name, 0, price);
     }
 
@@ -499,7 +503,7 @@ void pharmacyLoginRegister() {
 
 void loadData() {
       loadMedicines();
-      printf("Loaded medicine: '%s'\n", name);
+      
       // insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
       // insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
       // insertMedicine(103, "Amoxicillin 250mg", 20, 80.0f);
