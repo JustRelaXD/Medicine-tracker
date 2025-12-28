@@ -58,6 +58,8 @@ void userLoginRegister();
 void pharmacyLoginRegister();
 void loadData();
 void landingMenu();
+void loadMedicines();
+
 void searchMedicines();
 void handleNameError(const char *inputName);
 void showNearbyPharmacies(int medicineId);
@@ -76,6 +78,10 @@ void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty);
 int main() {
      
       loadData();
+      MedicineNode *m = findMedicineByName("Dolo 650");
+if (m)
+    printf("Loaded: %s %.2f\n", m->data.name, m->data.price);
+
       landingMenu();
 
       return 0;
@@ -117,6 +123,40 @@ void landingMenu() {
         }
     }
 }
+
+void loadMedicines() {
+    FILE *fp = fopen("medicines.txt", "r");
+    if (!fp) {
+        printf("Error: Could not open medicines.txt\n");
+        return;
+    }
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), fp)) {
+        char *token;
+        int id;
+        char name[100];
+        float price;
+
+        token = strtok(line, "|");
+        if (!token) continue;
+        id = atoi(token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(name, token);
+
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        price = atof(token);
+
+        insertMedicine(id, name, 0, price);
+    }
+
+    fclose(fp);
+}
+
 
 int getHash(const char *name) {
     unsigned long hash = 5381;
@@ -461,6 +501,7 @@ void pharmacyLoginRegister() {
 }
 
 void loadData() {
+      loadMedicines();
       insertMedicine(101, "Paracetamol 500mg", 50, 25.0f);
       insertMedicine(102, "Ibuprofen 200mg",   30, 40.0f);
       insertMedicine(103, "Amoxicillin 250mg", 20, 80.0f);
