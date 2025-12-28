@@ -53,7 +53,16 @@ typedef struct {
       PharmMed *inventory;
 } Pharmacy;
 
+typedef struct {
+    int pharmacyId;
+    char username[50];
+    char password[50];
+} PharmacyAccount;
+
 #define MAX_PHARMACIES 200
+PharmacyAccount pharmacyAccounts[MAX_PHARMACIES];
+int accountCount = 0;
+
 Pharmacy pharmacies[MAX_PHARMACIES];
 int pharmacyCount = 0;
 
@@ -83,6 +92,17 @@ void loadReservations();
 void viewAllReservations();  // optional
 void enqueueReservation(Reservation r);
 void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty, const char *custName, const char *custPhone);
+
+void loadPharmacyAccounts();
+int pharmacyLogin();
+void pharmacyDashboard(int pharmacyId);
+void viewPharmacyInventory(int pharmacyId);
+void addMedicineToInventory(int pharmacyId);
+void updateMedicineQuantity(int pharmacyId);
+void removeMedicineFromInventory(int pharmacyId);
+void viewPharmacyReservations(int pharmacyId);
+void updateReservationStatus(int pharmacyId);
+void saveAllReservationsToFile();
 
 int main() {
      
@@ -550,7 +570,10 @@ void userLoginRegister() {
 }
 
 void pharmacyLoginRegister() {
-      printf("\n[Pharmacy Login / Register feature not implemented yet]\n");
+      int pharmacyId = pharmacyLogin();
+    if (pharmacyId != -1) {
+        pharmacyDashboard(pharmacyId);
+    }
 }
 
 void loadData() {
@@ -558,7 +581,7 @@ void loadData() {
       loadPharmacies();
       loadInventory();
       loadReservations();
-
+      loadPharmacyAccounts();
       printf("Loaded sample medicines and pharmacies.\n");
 }
 
@@ -779,3 +802,343 @@ void loadReservations() {
     printf("Next reservation ID will be: %d\n\n", nextReservationId);
 }
 
+void loadPharmacyAccounts() {
+    FILE *fp = fopen("accounts.txt", "r");
+    if (!fp) {
+        printf("Warning: Could not open accounts.txt. No pharmacy accounts loaded.\n");
+        return;
+    }
+    
+    char line[256];
+    while (fgets(line, sizeof(line), fp)) {
+        char *token;
+        int pharmacyId;
+        char username[50], password[50];
+        
+        token = strtok(line, "|");
+        if (!token) continue;
+        pharmacyId = atoi(token);
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(username, token);
+        
+        token = strtok(NULL, "|");
+        if (!token) continue;
+        strcpy(password, token);
+        password[strcspn(password, "\n")] = '\0';
+        
+        pharmacyAccounts[accountCount].pharmacyId = pharmacyId;
+        strcpy(pharmacyAccounts[accountCount].username, username);
+        strcpy(pharmacyAccounts[accountCount].password, password);
+        accountCount++;
+    }
+    
+    fclose(fp);
+    printf("Loaded %d pharmacy accounts\n", accountCount);
+}
+
+int pharmacyLogin() {
+    char username[50], password[50];
+    
+    printf("\n===== Pharmacy Login =====\n");
+    printf("Username: ");
+    scanf(" %[^\n]", username);
+    printf("Password: ");
+    scanf(" %[^\n]", password);
+    
+    for (int i = 0; i < accountCount; i++) {
+        if (strcmp(pharmacyAccounts[i].username, username) == 0 &&
+            strcmp(pharmacyAccounts[i].password, password) == 0) {
+            
+            Pharmacy *p = findPharmacyById(pharmacyAccounts[i].pharmacyId);
+            if (p) {
+                printf("\n✓ Login successful! Welcome %s\n", p->name);
+                return pharmacyAccounts[i].pharmacyId;
+            }
+        }
+    }
+    
+    printf("\n✗ Invalid username or password\n");
+    return -1;
+}
+
+void pharmacyDashboard(int pharmacyId) {
+    Pharmacy *pharmacy = findPharmacyById(pharmacyId);
+    if (!pharmacy) {
+        printf("Error: Pharmacy not found\n");
+        return;
+    }
+    
+    while (1) {
+        printf("\n========================================\n");
+        printf("  %s - Dashboard\n", pharmacy->name);
+        printf("========================================\n");
+        printf("1. View Inventory\n");
+        printf("2. Add Medicine to Inventory\n");
+        printf("3. Update Medicine Quantity\n");
+        printf("4. View Reservations\n");
+        printf("5. Update Reservation Status\n");
+        printf("6. Logout\n");
+        printf("Enter choice: ");
+        
+        int choice;
+        if (scanf("%d", &choice) != 1) {
+            while (getchar() != '\n');
+            continue;
+        }
+        
+        switch (choice) {
+            case 1:
+                viewPharmacyInventory(pharmacyId);
+                break;
+            case 2:
+                addMedicineToInventory(pharmacyId);
+                break;
+            case 3:
+                updateMedicineQuantity(pharmacyId);
+                break;
+            case 4:
+                viewPharmacyReservations(pharmacyId);
+                break;
+            case 5:
+                updateReservationStatus(pharmacyId);
+                break;
+            case 6:
+                printf("Logging out...\n");
+                return;
+            default:
+                printf("Invalid choice\n");
+        }
+    }
+}
+
+void viewPharmacyInventory(int pharmacyId) {
+    Pharmacy *p = findPharmacyById(pharmacyId);
+    if (!p) return;
+    
+    printf("\n===== Inventory for %s =====\n", p->name);
+    
+    PharmMed *cur = p->inventory;
+    if (!cur) {
+        printf("No medicines in inventory\n");
+        return;
+    }
+    
+    printf("%-10s %-30s %-10s %-10s\n", "Med ID", "Name", "Quantity", "Price");
+    printf("----------------------------------------------------------------\n");
+    
+    while (cur) {
+        MedicineNode *mnode = NULL;
+        for (int i = 0; i < HASH_SIZE && !mnode; i++) {
+            MedicineNode *m = medicineHash[i];
+            while (m) {
+                if (m->data.id == cur->medId) {
+                    mnode = m;
+                    break;
+                }
+                m = m->next;
+            }
+        }
+        
+        if (mnode) {
+            printf("%-10d %-30s %-10d %-10.2f\n", 
+                   cur->medId, mnode->data.name, cur->qty, mnode->data.price);
+        } else {
+            printf("%-10d %-30s %-10d %-10s\n", 
+                   cur->medId, "Unknown", cur->qty, "N/A");
+        }
+        
+        cur = cur->next;
+    }
+}
+
+void addMedicineToInventory(int pharmacyId) {
+    Pharmacy *p = findPharmacyById(pharmacyId);
+    if (!p) return;
+    
+    char medName[100];
+    int qty;
+    
+    printf("\n===== Add Medicine to Inventory =====\n");
+    printf("Enter medicine name: ");
+    scanf(" %[^\n]", medName);
+    
+    MedicineNode *mnode = findMedicineByName(medName);
+    if (!mnode) {
+        printf("Medicine '%s' not found in database\n", medName);
+        printf("Available medicines:\n");
+        for (int i = 0; i < HASH_SIZE; i++) {
+            MedicineNode *cur = medicineHash[i];
+            while (cur) {
+                printf("  - %s (ID: %d)\n", cur->data.name, cur->data.id);
+                cur = cur->next;
+            }
+        }
+        return;
+    }
+    
+    PharmMed *existing = findMedicineInPharmacy(p, mnode->data.id);
+    if (existing) {
+        printf("✗ Medicine already exists in your inventory (Current qty: %d)\n", existing->qty);
+        printf("Please use 'Update Medicine Quantity' option instead.\n");
+        return;
+    }
+    
+    printf("Enter quantity: ");
+    if (scanf("%d", &qty) != 1 || qty <= 0) {
+        printf("Invalid quantity\n");
+        while (getchar() != '\n');
+        return;
+    }
+    
+    PharmMed *node = (PharmMed*)malloc(sizeof(PharmMed));
+    if (!node) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+    node->medId = mnode->data.id;
+    node->qty = qty;
+    node->next = p->inventory;
+    p->inventory = node;
+    
+    printf("✓ Added %d units of %s to inventory\n", qty, mnode->data.name);
+}
+
+void updateMedicineQuantity(int pharmacyId) {
+    Pharmacy *p = findPharmacyById(pharmacyId);
+    if (!p) return;
+    
+    int medId, newQty;
+    
+    printf("\n===== Update Medicine Quantity =====\n");
+    viewPharmacyInventory(pharmacyId);
+    
+    printf("\nEnter Medicine ID to update: ");
+    if (scanf("%d", &medId) != 1) {
+        while (getchar() != '\n');
+        return;
+    }
+    
+    PharmMed *pm = findMedicineInPharmacy(p, medId);
+    if (!pm) {
+        printf("Medicine not found in your inventory\n");
+        return;
+    }
+    
+    printf("Current quantity: %d\n", pm->qty);
+    printf("Enter new quantity: ");
+    if (scanf("%d", &newQty) != 1 || newQty < 0) {
+        printf("Invalid quantity\n");
+        while (getchar() != '\n');
+        return;
+    }
+    
+    pm->qty = newQty;
+    printf("✓ Quantity updated to %d\n", newQty);
+}
+
+void viewPharmacyReservations(int pharmacyId) {
+    printf("\n===== Reservations for Pharmacy ID %d =====\n", pharmacyId);
+    
+    ReservationNode *cur = resFront;
+    int found = 0;
+    
+    while (cur) {
+        if (cur->data.pharmacyId == pharmacyId) {
+            found = 1;
+            Reservation r = cur->data;
+            
+            MedicineNode *mnode = NULL;
+            for (int i = 0; i < HASH_SIZE && !mnode; i++) {
+                MedicineNode *m = medicineHash[i];
+                while (m) {
+                    if (m->data.id == r.medicineId) {
+                        mnode = m;
+                        break;
+                    }
+                    m = m->next;
+                }
+            }
+            const char *medName = mnode ? mnode->data.name : "Unknown";
+            
+            const char *statusText;
+            switch(r.status) {
+                case 0: statusText = "Pending"; break;
+                case 1: statusText = "Completed"; break;
+                case 2: statusText = "Cancelled"; break;
+                default: statusText = "Unknown";
+            }
+            
+            printf("\n[Reservation ID: %d]\n", r.reservationId);
+            printf("  Customer: %s (Phone: %s)\n", r.customerName, r.customerPhone);
+            printf("  Medicine: %s\n", medName);
+            printf("  Quantity: %d\n", r.qty);
+            printf("  Status: %s\n", statusText);
+            printf("  ------------------------\n");
+        }
+        cur = cur->next;
+    }
+    
+    if (!found) {
+        printf("No reservations found\n");
+    }
+}
+
+void updateReservationStatus(int pharmacyId) {
+    printf("\n===== Update Reservation Status =====\n");
+    viewPharmacyReservations(pharmacyId);
+    
+    int resId, newStatus;
+    
+    printf("\nEnter Reservation ID to update: ");
+    if (scanf("%d", &resId) != 1) {
+        while (getchar() != '\n');
+        return;
+    }
+    
+    ReservationNode *cur = resFront;
+    while (cur) {
+        if (cur->data.reservationId == resId && cur->data.pharmacyId == pharmacyId) {
+            printf("Current status: %d (0=Pending, 1=Completed, 2=Cancelled)\n", cur->data.status);
+            printf("Enter new status (0/1/2): ");
+            
+            if (scanf("%d", &newStatus) != 1 || newStatus < 0 || newStatus > 2) {
+                printf("Invalid status\n");
+                while (getchar() != '\n');
+                return;
+            }
+            
+            cur->data.status = newStatus;
+            saveAllReservationsToFile();
+            printf("✓ Reservation status updated\n");
+            return;
+        }
+        cur = cur->next;
+    }
+    
+    printf("Reservation not found or doesn't belong to your pharmacy\n");
+}
+
+void saveAllReservationsToFile() {
+    FILE *fp = fopen("reservation.txt", "w");
+    if (!fp) {
+        printf("Error: Could not open reservation.txt for writing\n");
+        return;
+    }
+    
+    ReservationNode *cur = resFront;
+    while (cur) {
+        fprintf(fp, "%d|%d|%d|%d|%d|%s|%s\n",
+                cur->data.reservationId,
+                cur->data.pharmacyId,
+                cur->data.medicineId,
+                cur->data.qty,
+                cur->data.status,
+                cur->data.customerName,
+                cur->data.customerPhone);
+        cur = cur->next;
+    }
+    
+    fclose(fp);
+}
