@@ -62,7 +62,7 @@ void searchMedicines();
 void handleNameError(const char *inputName);
 void showNearbyPharmacies(int medicineId);
 
-int getHash(int id);
+int getHash(const char *name);
 void insertMedicine(int id, const char *name, int qty, float price);
 MedicineNode* findMedicineByName(const char *name);
 
@@ -79,10 +79,6 @@ int main() {
       landingMenu();
 
       return 0;
-}
-
-int getHash(int id) {
-      return id % HASH_SIZE;
 }
 
 void landingMenu() {
@@ -122,6 +118,14 @@ void landingMenu() {
     }
 }
 
+int getHash(const char *name) {
+    unsigned long hash = 5381;
+    int c;
+    while ((c = *name++))
+        hash = ((hash << 5) + hash) + c;
+    return hash % HASH_SIZE;
+}
+
 void insertMedicine(int id, const char *name, int qty, float price) {
     MedicineNode *node = (MedicineNode*)malloc(sizeof(MedicineNode));
     if (node == NULL) {
@@ -134,7 +138,7 @@ void insertMedicine(int id, const char *name, int qty, float price) {
     node->data.quantity = qty;
     node->data.price = price;
 
-    int h = getHash(id);
+    int h = getHash(name);
     node->next = medicineHash[h];
     medicineHash[h] = node;
 }
@@ -217,15 +221,13 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
 }
 
 MedicineNode* findMedicineByName(const char *name) {
-    if (!name) return NULL;
-    for (int i = 0; i < HASH_SIZE; i++) {
-        MedicineNode *cur = medicineHash[i];
-        while (cur) {
-            if (strcmp(cur->data.name, name) == 0) {
-                return cur;
-            }
-            cur = cur->next;
-        }
+    int index = getHash(name);
+    MedicineNode *cur = medicineHash[index];
+
+    while (cur) {
+        if (strcmp(cur->data.name, name) == 0)
+            return cur;
+        cur = cur->next;
     }
     return NULL;
 }
