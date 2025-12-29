@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include <ctype.h>
 
 #define HASH_SIZE 101
 
@@ -88,7 +89,7 @@ PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId);
 
 void saveReservationToFile(Reservation r);
 void loadReservations();
-void viewAllReservations();  // optional
+void viewAllReservations(); 
 void enqueueReservation(Reservation r);
 void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty, const char *custName, const char *custPhone);
 
@@ -118,7 +119,7 @@ void landingMenu() {
         printf("\n===============================\n");
         printf("         Medicine Tracker\n");
         printf("===============================\n");
-        printf("1. Search Medicines (No login required)\n");
+        printf("1. Search Medicines \n");
         printf("2. Pharmacy Login / Register\n");
         printf("3. Exit\n");
         printf("Enter your choice: ");
@@ -419,7 +420,6 @@ void showNearbyPharmacies(int initialMedicineId) {
                         selected[selCount++] = mnode->data.id;
                         printf("Added '%s'. Total selected: %d\n", mnode->data.name, selCount);
 
-                        /* show details immediately after adding */
                         printf("Details:\n");
                         printf("Medicine : %s\n", mnode->data.name);
                         printf("Price    : %.2f\n", mnode->data.price);
@@ -555,8 +555,37 @@ void showNearbyPharmacies(int initialMedicineId) {
 }
 
 void handleNameError(const char *inputName) {
-      printf("[Name error handler not implemented for '%s']\n", inputName);
+    int found = 0;
+    char input[100];
+
+    strcpy(input, inputName);
+    for (int i = 0; input[i]; i++)
+        input[i] = tolower(input[i]);
+
+    printf("Did you mean:\n");
+
+    for (int i = 0; i < HASH_SIZE; i++) {
+        MedicineNode *m = medicineHash[i];
+        while (m) {
+            char name[100];
+            strcpy(name, m->data.name);
+
+            for (int j = 0; name[j]; j++)
+                name[j] = tolower(name[j]);
+
+            if (strstr(name, input)) {
+                printf(" - %s\n", m->data.name);
+                found = 1;
+            }
+            m = m->next;
+        }
+    }
+
+    if (!found) {
+        printf("No similar medicines found.\n");
+    }
 }
+
 
 void pharmacyLoginRegister() {
       int pharmacyId = pharmacyLogin();
