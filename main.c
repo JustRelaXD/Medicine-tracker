@@ -99,7 +99,6 @@ void pharmacyDashboard(int pharmacyId);
 void viewPharmacyInventory(int pharmacyId);
 void addMedicineToInventory(int pharmacyId);
 void updateMedicineQuantity(int pharmacyId);
-void removeMedicineFromInventory(int pharmacyId);
 void viewPharmacyReservations(int pharmacyId);
 void updateReservationStatus(int pharmacyId);
 void saveAllReservationsToFile();
@@ -257,66 +256,6 @@ void saveReservationToFile(Reservation r) {
             r.customerPhone);
     
     fclose(fp);
-}
-
-void viewAllReservations() {
-    if (!resFront) {
-        printf("\nNo reservations found.\n");
-        return;
-    }
-    
-    printf("\n========== ALL RESERVATIONS ==========\n");
-    ReservationNode *cur = resFront;
-    
-    while (cur) {
-        Reservation r = cur->data;
-
-        Pharmacy *p = findPharmacyById(r.pharmacyId);
-        const char *pharmName = p ? p->name : "Unknown";
-
-        MedicineNode *mnode = NULL;
-        for (int i = 0; i < HASH_SIZE && !mnode; i++) {
-            MedicineNode *m = medicineHash[i];
-            while (m) {
-                if (m->data.id == r.medicineId) {
-                    mnode = m;
-                    break;
-                }
-                m = m->next;
-            }
-        }
-        const char *medName = mnode ? mnode->data.name : "Unknown";
-
-        const char *statusText;
-        switch(r.status) {
-            case 0: statusText = "Pending"; break;
-            case 1: statusText = "Completed"; break;
-            case 2: statusText = "Cancelled"; break;
-            default: statusText = "Unknown";
-        }
-        
-        printf("\nReservation ID: %d\n", r.reservationId);
-        printf("Customer: %s (Phone: %s)\n", r.customerName, r.customerPhone);
-        printf("Pharmacy: %s\n", pharmName);
-        printf("Medicine: %s\n", medName);
-        printf("Quantity: %d\n", r.qty);
-        printf("Status: %s\n", statusText);
-        printf("-----------------------------------\n");
-        
-        cur = cur->next;
-    }
-}
-
-void addPharmacy(int id, const char *name, int pincode, float lat, float lon) {
-      if (pharmacyCount >= MAX_PHARMACIES) return;
-      pharmacies[pharmacyCount].id = id;
-      strncpy(pharmacies[pharmacyCount].name, name, sizeof(pharmacies[pharmacyCount].name)-1);
-      pharmacies[pharmacyCount].name[sizeof(pharmacies[pharmacyCount].name)-1] = '\0';
-      pharmacies[pharmacyCount].pincode = pincode;
-      pharmacies[pharmacyCount].lat = lat;
-      pharmacies[pharmacyCount].lon = lon;
-      pharmacies[pharmacyCount].inventory = NULL;
-      pharmacyCount++;
 }
 
 PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId) {
@@ -600,7 +539,6 @@ void loadData() {
       loadInventory();
       loadReservations();
       loadPharmacyAccounts();
-      printf("Loaded sample medicines and pharmacies.\n");
 }
 
 void loadMedicines() {
@@ -689,7 +627,6 @@ void loadInventory() {
         return;
     }
 
-    printf("Loading inventory from file...\n");
     char line[256];
     int lineCount = 0;
 
@@ -734,32 +671,9 @@ void loadInventory() {
         node->qty = qty;
         node->next = p->inventory;
         p->inventory = node;
-
-        printf("Added: Pharmacy %d (%s) - Medicine %d - Qty %d\n", 
-               pharmacyId, p->name, medId, qty);
     }
 
     fclose(fp);
-    
-    printf("\n===== INVENTORY SUMMARY =====\n");
-    printf("Total pharmacies loaded: %d\n\n", pharmacyCount);
-    
-    for (int i = 0; i < pharmacyCount; i++) {
-        printf("Pharmacy: %s (ID: %d, Pincode: %d)\n", 
-               pharmacies[i].name, pharmacies[i].id, pharmacies[i].pincode);
-        
-        PharmMed *cur = pharmacies[i].inventory;
-        if (!cur) {
-            printf("  No inventory loaded\n");
-        } else {
-            while (cur) {
-                printf("  - Medicine ID %d: Qty %d\n", cur->medId, cur->qty);
-                cur = cur->next;
-            }
-        }
-        printf("\n");
-    }
-    printf("===========================\n\n");
 }
 
 void loadReservations() {
@@ -816,8 +730,6 @@ void loadReservations() {
     }
     
     fclose(fp);
-    printf("Loaded %d existing reservations\n", count);
-    printf("Next reservation ID will be: %d\n\n", nextReservationId);
 }
 
 void loadPharmacyAccounts() {
@@ -853,7 +765,6 @@ void loadPharmacyAccounts() {
     }
     
     fclose(fp);
-    printf("Loaded %d pharmacy accounts\n", accountCount);
 }
 
 int pharmacyLogin() {
