@@ -49,8 +49,6 @@ typedef struct {
     char name[50];
     char location[100];  
     char phone[20];
-    float lat;
-    float lon;
     PharmMed *inventory;
 } Pharmacy;
 
@@ -76,20 +74,17 @@ void loadInventory();
 void landingMenu();
 
 void searchMedicines();
-void handleNameError(const char *inputName);
+int handleNameError(const char *inputName);
 void showNearbyPharmacies(int medicineId);
 Pharmacy* findPharmacyById(int id);
 int getHash(const char *name);
 void insertMedicine(int id, const char *name, int qty, float price);
 MedicineNode* findMedicineByName(const char *name);
-
-void addPharmacy(int id, const char *name, int pincode, float lat, float lon);
 void addMedicineToPharmacy(int pharmacyId, int medId, int qty);
 PharmMed* findMedicineInPharmacy(Pharmacy *p, int medId);
 
 void saveReservationToFile(Reservation r);
 void loadReservations();
-void viewAllReservations(); 
 void enqueueReservation(Reservation r);
 void createAndEnqueueReservation(int pharmacyId, int medicineId, int qty, const char *custName, const char *custPhone);
 
@@ -169,34 +164,53 @@ void insertMedicine(int id, const char *name, int qty, float price) {
 }
 
 void searchMedicines() {
-      char input[50];
-      int found = 0;
+    char input[50];
+    int found = 0;
 
-      printf("\n----- Search Medicines -----\n");
-      printf("Enter medicine name : ");
-      scanf(" %[^\n]", input);   
+    printf("\n----- Search Medicines -----\n");
+    printf("Enter medicine name : ");
+    scanf(" %[^\n]", input);   
 
-      for (int i = 0; i < HASH_SIZE; i++) {
-            MedicineNode *curr = medicineHash[i];
-            while (curr != NULL) {
-                  if (strcmp(curr->data.name, input) == 0) {
-                        printf("\nMedicine Found:\n");
-                        printf("Name     : %s\n", curr->data.name);
-                        printf("Price    : Rs. %.2f\n", curr->data.price);
-                        showNearbyPharmacies(curr->data.id);
+    for (int i = 0; i < HASH_SIZE; i++) {
+        MedicineNode *curr = medicineHash[i];
+        while (curr != NULL) {
+            if (strcmp(curr->data.name, input) == 0) {
+                printf("\nMedicine Found:\n");
+                printf("Name     : %s\n", curr->data.name);
+                printf("Price    : %.2f\n", curr->data.price);
+                showNearbyPharmacies(curr->data.id);
 
-                        found = 1;
+                found = 1;
+                break;
+            }
+            curr = curr->next;
+        }
+        if (found) break;
+    }
+
+    if (!found) {
+        printf("\nMedicine '%s' not found.\n", input);
+        int selectedId = handleNameError(input);
+        if (selectedId != -1) {
+            MedicineNode *mnode = NULL;
+            for (int i = 0; i < HASH_SIZE && !mnode; i++) {
+                MedicineNode *cur = medicineHash[i];
+                while (cur) {
+                    if (cur->data.id == selectedId) {
+                        mnode = cur;
                         break;
                     }
-                  curr = curr->next;
-              }
-            if (found) break;
+                    cur = cur->next;
+                }
+            }
+            if (mnode) {
+                printf("\nMedicine Selected:\n");
+                printf("Name     : %s\n", mnode->data.name);
+                printf("Price    : %.2f\n", mnode->data.price);
+                showNearbyPharmacies(mnode->data.id);
+            }
         }
-
-      if (!found) {
-            printf("\nMedicine '%s' not found.\n", input);
-            handleNameError(input);
-        }
+    }
 }
 
 Pharmacy* findPharmacyById(int id) {
@@ -335,37 +349,51 @@ void showNearbyPharmacies(int initialMedicineId) {
               }
 
             if (choice == 1) {
-                  printf("Enter medicine name : ");
-                  scanf(" %[^\n]", input);
-                  MedicineNode *mnode = findMedicineByName(input);
-                  if (!mnode) {
-                        printf("Medicine '%s' not found.\n", input);
-                        handleNameError(input);
-                        printf("1. Try again  2. Return\n");
-                        int c;
-                        if (scanf(" %d", &c) != 1) {
-                              int ch;
-                              while ((ch = getchar()) != '\n' && ch != EOF) { }
-                              c = 2;
-                          }
-                        if (c == 1) continue;
-                        else return;
+                printf("\n----- Search Medicines -----\n");
+                printf("Enter medicine name : ");
+                scanf(" %[^\n]", input);
+                MedicineNode *mnode = findMedicineByName(input);
+                if (!mnode) {
+                    printf("\nMedicine '%s' not found.\n", input);
+                    int selectedId = handleNameError(input);
+                    if (selectedId == -1) {
+                        continue;  
                     }
-                  int exists = 0;
-                  for (int i = 0; i < selCount; i++) if (selected[i] == mnode->data.id) { exists = 1; break; }
-                  if (!exists && selCount < 100) {
-                        selected[selCount++] = mnode->data.id;
-                        printf("Added '%s'. Total selected: %d\n", mnode->data.name, selCount);
-
-                        printf("Details:\n");
-                        printf("Medicine : %s\n", mnode->data.name);
-                        printf("Price    : %.2f\n", mnode->data.price);
-                        printf("In stock : %d (global)\n", mnode->data.quantity);
-                    } else {
-                        printf("Already selected or selection full.\n");
+                
+                    for (int b = 0; b < HASH_SIZE && !mnode; b++) {
+                        MedicineNode *cur = medicineHash[b];
+                        while (cur) {
+                            if (cur->data.id == selectedId) {
+                                mnode = cur;
+                                break;
+                            }
+                            cur = cur->next;
+                        }
                     }
-                  continue;
-              }
+                    if (!mnode) {
+                        printf("Error finding medicine.\n");
+                        continue;
+                    }
+                }
+                
+                int exists = 0;
+                for (int i = 0; i < selCount; i++) {
+                    if (selected[i] == mnode->data.id) {
+                        exists = 1;
+                        break;
+                    }
+                }
+                
+                if (!exists && selCount < 100) {
+                    selected[selCount++] = mnode->data.id;
+                    printf("\nMedicine Selected:\n");
+                    printf("Name     : %s\n", mnode->data.name);
+                    printf("Price    : %.2f\n", mnode->data.price);
+                } else {
+                    printf("Already selected or selection full.\n");
+                }
+                continue;
+            }
 
             else if (choice == 2) {
                   int foundAny = 0;
@@ -491,15 +519,17 @@ void showNearbyPharmacies(int initialMedicineId) {
         }
 }
 
-void handleNameError(const char *inputName) {
+int handleNameError(const char *inputName) {
     int found = 0;
     char input[100];
+    MedicineNode *suggestions[100];
+    int suggestionCount = 0;
 
     strcpy(input, inputName);
     for (int i = 0; input[i]; i++)
         input[i] = tolower(input[i]);
 
-    printf("Did you mean:\n");
+    printf("\nDid you mean:\n");  
 
     for (int i = 0; i < HASH_SIZE; i++) {
         MedicineNode *m = medicineHash[i];
@@ -511,7 +541,9 @@ void handleNameError(const char *inputName) {
                 name[j] = tolower(name[j]);
 
             if (strstr(name, input)) {
-                printf(" - %s\n", m->data.name);
+                suggestionCount++;
+                printf("%d. %s\n", suggestionCount, m->data.name);
+                suggestions[suggestionCount - 1] = m;
                 found = 1;
             }
             m = m->next;
@@ -520,6 +552,25 @@ void handleNameError(const char *inputName) {
 
     if (!found) {
         printf("No similar medicines found.\n");
+        return -1;  
+    }
+
+    printf("\nEnter the number to select a medicine (0 to cancel): ");
+    int choice;
+    if (scanf("%d", &choice) != 1) {
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) { }
+        return -1;
+    }
+
+    if (choice > 0 && choice <= suggestionCount) {
+        MedicineNode *selected = suggestions[choice - 1];
+        return selected->data.id;  
+    } else if (choice == 0) {
+        return -1;  
+    } else {
+        printf("Invalid choice.\n");
+        return -1;
     }
 }
 
