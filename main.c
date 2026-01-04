@@ -45,13 +45,13 @@ typedef struct PharmMed {
 } PharmMed;
 
 typedef struct {
-      int id;
-      char name[50];
-      int pincode;
-      char phone[20];
-      float lat;
-      float lon;
-      PharmMed *inventory;
+    int id;
+    char name[50];
+    char location[100];  
+    char phone[20];
+    float lat;
+    float lon;
+    PharmMed *inventory;
 } Pharmacy;
 
 typedef struct {
@@ -181,10 +181,8 @@ void searchMedicines() {
             while (curr != NULL) {
                   if (strcmp(curr->data.name, input) == 0) {
                         printf("\nMedicine Found:\n");
-                        printf("ID       : %d\n", curr->data.id);
                         printf("Name     : %s\n", curr->data.name);
-                        printf("Quantity : %d\n", curr->data.quantity);
-                        printf("Price    : %.2f\n", curr->data.price);
+                        printf("Price    : Rs. %.2f\n", curr->data.price);
                         showNearbyPharmacies(curr->data.id);
 
                         found = 1;
@@ -380,7 +378,7 @@ void showNearbyPharmacies(int initialMedicineId) {
                           }
                         if (hasAll) {
                               foundAny = 1;
-                              printf(" - %s | Pincode: %d\n", pharmacies[i].name, pharmacies[i].pincode);
+                              printf(" - %s | Location: %s\n", pharmacies[i].name, pharmacies[i].location);
                           }
                     }
                   if (!foundAny) printf(" No pharmacies found with all selected medicines.\n");
@@ -410,7 +408,7 @@ void showNearbyPharmacies(int initialMedicineId) {
                   printf("\nPharmacies that have all selected medicines:\n");
                   for (int i = 0; i < matchCount; i++) {
                         int pidx = matches[i];
-                        printf("%d) %s | Pincode: %d\n", i+1, pharmacies[pidx].name, pharmacies[pidx].pincode);
+                        printf("%d) %s | Location: %s\n", i+1, pharmacies[pidx].name, pharmacies[pidx].location);
                     }
 
                   printf("Enter pharmacy number to book from (1-%d): ", matchCount);
@@ -586,9 +584,10 @@ void loadPharmacies() {
 
     while (fgets(line, sizeof(line), fp)) {
         char *token;
-        int id, pincode;
+        int id;
         char name[100];
         char phone[20];
+        char location[100];  
 
         token = strtok(line, "|");
         if (!token) continue;
@@ -601,7 +600,8 @@ void loadPharmacies() {
 
         token = strtok(NULL, "|");
         if (!token) continue;
-        pincode = atoi(token);
+        strcpy(location, token);  
+        location[strcspn(location, "\n")] = '\0';
 
         token = strtok(NULL, "|");
         if (!token) continue;
@@ -610,7 +610,7 @@ void loadPharmacies() {
 
         pharmacies[pharmacyCount].id = id;
         strcpy(pharmacies[pharmacyCount].name, name);
-        pharmacies[pharmacyCount].pincode = pincode;
+        strcpy(pharmacies[pharmacyCount].location, location);  
         strcpy(pharmacies[pharmacyCount].phone, phone);
         pharmacies[pharmacyCount].inventory = NULL;
 

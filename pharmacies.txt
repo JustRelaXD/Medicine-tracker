@@ -1,3 +1,20 @@
-1|Apollo Pharmacy|560001|9876543210
-2|MedPlus|560034|9123456789
-3|Local Medical Store|560078|9988776655
+1|Apollo Pharmacy|Hampankatta, Mangalore|9876543210
+2|MedPlus|Kadri, Mangalore|9123456789
+3|Local Medical Store|Bejai, Mangalore|9988776655
+4|City Pharmacy|Balmatta Road, Mangalore|9845123456
+5|HealthCare Medicals|Falnir, Mangalore|9448765432
+6|Sunrise Pharmacy|Kankanady, Mangalore|9886543210
+7|Wellness Drugstore|Kodialbail, Mangalore|9765432108
+8|MediLife Pharmacy|Padil, Mangalore|9123987654
+9|Care Plus Medicals|Pumpwell, Mangalore|9876012345
+10|Green Cross Pharmacy|Surathkal, Mangalore|9901234567
+11|Lifeline Medicals|Deralakatte, Mangalore|9845678901
+12|Quick Meds|Valencia, Mangalore|9448123789
+13|Trust Pharmacy|Nanthoor, Mangalore|9886234567
+14|Remedy Medicals|Bondel, Mangalore|9765876543
+15|Prime Healthcare|Attavar, Mangalore|9123456780
+16|Central Pharmacy|Bunts Hostel, Mangalore|9876543219
+17|Relief Medicals|Jyothi, Mangalore|9901987654
+18|Medico Pharmacy|Kavoor, Mangalore|9845321098
+19|Care First Drugstore|Kottara, Mangalore|9448987123
+20|Global Medicals|Mangaladevi, Mangalore|9886765432
