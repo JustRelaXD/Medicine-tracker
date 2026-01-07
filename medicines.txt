@@ -1,12 +1,120 @@
 101|Dolo 650|25.00
 102|Crocin|18.50
-103|Azithromycin 500|120.00
-104|Paracetamol 500mg|25.00
-105|Paracetamol 650mg|40.00
-106|Alpha|35.00
-107|Delta|34.00
-108|Gamma|34.00
-109|test|345.00
-110|try|35.00
-111|trrerg|453.00
-112|cough|34.00
+103|Crocin Advance|22.00
+104|Crocin Pain Relief|24.50
+105|Paracetamol 500mg|15.00
+106|Paracetamol 650mg|20.00
+107|Paracetamol Syrup|45.00
+108|Paracetamol Suspension|38.00
+109|Azithromycin 250mg|85.00
+110|Azithromycin 500mg|120.00
+111|Azithromycin Tablets|95.00
+112|Amoxicillin 250mg|55.00
+113|Amoxicillin 500mg|75.00
+114|Amoxicillin Capsules|68.00
+115|Cetirizine 10mg|12.00
+116|Cetirizine Syrup|35.00
+117|Cetirizine Tablets|14.50
+118|Ibuprofen 200mg|18.00
+119|Ibuprofen 400mg|28.00
+120|Ibuprofen Gel|65.00
+121|Ibuprofen Suspension|42.00
+122|Combiflam|22.00
+123|Combiflam Plus|28.00
+124|Vicks Vaporub|85.00
+125|Vicks Action 500|16.00
+126|Vicks Cough Drops|25.00
+127|Disprin|12.00
+128|Disprin Extra|18.00
+129|Brufen 400mg|32.00
+130|Brufen 600mg|45.00
+131|Brufen Syrup|52.00
+132|Betadine Solution|75.00
+133|Betadine Ointment|95.00
+134|Betadine Gargle|68.00
+135|Dettol Antiseptic|85.00
+136|Dettol Hand Sanitizer|45.00
+137|Dettol Soap|35.00
+138|Metformin 500mg|8.00
+139|Metformin 850mg|12.00
+140|Metformin ER 1000mg|18.00
+141|Atorvastatin 10mg|25.00
+142|Atorvastatin 20mg|35.00
+143|Atorvastatin 40mg|48.00
+144|Ciprofloxacin 250mg|45.00
+145|Ciprofloxacin 500mg|65.00
+146|Ciprofloxacin Eye Drops|55.00
+147|Omeprazole 20mg|15.00
+148|Omeprazole 40mg|22.00
+149|Omeprazole Capsules|18.50
+150|Pantoprazole 20mg|12.00
+151|Pantoprazole 40mg|18.00
+152|Pantoprazole DSR|25.00
+153|Ranitidine 150mg|10.00
+154|Ranitidine 300mg|16.00
+155|Ranitidine Syrup|28.00
+156|Aspirin 75mg|8.00
+157|Aspirin 150mg|12.00
+158|Aspirin EC 325mg|15.00
+159|Vitamin C 500mg|45.00
+160|Vitamin C 1000mg|65.00
+161|Vitamin C Chewable|52.00
+162|Vitamin D3 1000IU|85.00
+163|Vitamin D3 2000IU|125.00
+164|Vitamin D3 Drops|145.00
+165|Calcium 500mg|55.00
+166|Calcium + D3|75.00
+167|Calcium Carbonate|48.00
+168|Multivitamin Tablets|125.00
+169|Multivitamin Syrup|95.00
+170|Multivitamin Capsules|145.00
+171|Iron Tablets|35.00
+172|Iron + Folic Acid|42.00
+173|Iron Syrup|55.00
+174|Zinc Tablets|28.00
+175|Zinc Sulphate|32.00
+176|Zinc Suspension|45.00
+177|B-Complex Tablets|48.00
+178|B-Complex Forte|65.00
+179|B-Complex Injection|85.00
+180|Cough Syrup Adult|65.00
+181|Cough Syrup Pediatric|55.00
+182|Cough Lozenges|25.00
+183|Antibiotic Eye Drops|85.00
+184|Antibiotic Eye Ointment|75.00
+185|Antibiotic Ear Drops|68.00
+186|Pain Relief Gel|95.00
+187|Pain Relief Spray|115.00
+188|Pain Relief Patch|145.00
+189|Digene Tablets|22.00
+190|Digene Gel|38.00
+191|Digene Syrup|45.00
+192|Eno Powder|15.00
+193|Eno Lemon|18.00
+194|Eno Orange|18.00
+195|Pudin Hara|55.00
+196|Pudin Hara Pearls|45.00
+197|Gelusil Tablets|28.00
+198|Gelusil Syrup|48.00
+199|Lactocalamine Lotion|125.00
+200|Lactocalamine Cream|95.00
+201|Calamine Lotion|85.00
+202|Cold Relief Tablets|32.00
+203|Cold Relief Syrup|58.00
+204|Allergy Relief 24HR|48.00
+205|Allergy Relief Syrup|42.00
+206|Fever Relief Tablets|18.00
+207|Fever Relief Syrup|35.00
+208|Throat Lozenges|22.00
+209|Throat Spray|65.00
+210|Nasal Spray|95.00
+211|Nasal Drops|75.00
+212|Antacid Tablets|15.00
+213|Antacid Liquid|38.00
+214|Laxative Tablets|25.00
+215|Laxative Syrup|45.00
+216|Anti-diarrheal Tablets|32.00
+217|ORS Powder|12.00
+218|ORS Ready Mix|18.00
+219|Electral Powder|15.00
+220|Electral Orange|16.00
